@@ -1,0 +1,333 @@
+/*
+ * tbh.md — Graphyn Design System
+ *
+ * Quiet network monitor. No theater.
+ * Host Grotesk, sharp corners, no shadows, no glow.
+ */
+
+/* ── Font ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@300;400;500;600;700&display=swap');
+
+/* ── Tokens ───────────────────────────────────────── */
+:root {
+  --bg: #0a0a0a;
+  --surface: #111111;
+  --surface-raised: #181818;
+  --border: #2b2b2b;
+  --border-subtle: #1e1e1e;
+  --text: #fafafa;
+  --text-secondary: #9a9a9a;
+  --text-tertiary: rgba(255, 255, 255, 0.4);
+  --primary: #a899e0;
+  --primary-dim: rgba(168, 153, 224, 0.15);
+  --green: #4ade80;
+  --green-dim: rgba(74, 222, 128, 0.12);
+  --cyan: #60a5fa;
+  --cyan-dim: rgba(96, 165, 250, 0.12);
+  --amber: #fbbf24;
+  --amber-dim: rgba(251, 191, 36, 0.12);
+  --radius: 0rem;
+  --font: 'Host Grotesk', ui-sans-serif, sans-serif, system-ui;
+}
+
+/* ── Reset ────────────────────────────────────────── */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Layout ───────────────────────────────────────── */
+.terminal {
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Header ───────────────────────────────────────── */
+.terminal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.brand span {
+  color: var(--text-tertiary);
+}
+
+.status-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  border: 1px solid var(--border-subtle);
+}
+
+.pill strong {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ── Main Layout ──────────────────────────────────── */
+.layout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 12px;
+}
+
+.map-panel,
+.log-panel {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+}
+
+.panel-title {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+/* ── Map ──────────────────────────────────────────── */
+#map {
+  width: 100%;
+  height: 100%;
+  display: block;
+  background: var(--surface);
+}
+
+.country {
+  fill: #141414;
+  stroke: var(--border);
+  stroke-width: 0.5;
+}
+
+.graticule {
+  fill: none;
+  stroke: var(--border-subtle);
+  stroke-width: 0.4;
+}
+
+/* ── Routes — no glow, just lines ────────────────── */
+.route {
+  fill: none;
+  stroke-width: 1;
+  opacity: 0.7;
+}
+
+.route.capture {
+  stroke: var(--green);
+}
+
+.route.synthesis {
+  stroke: var(--cyan);
+}
+
+.route.deploy {
+  stroke: var(--amber);
+}
+
+/* ── Dots — small, quiet ─────────────────────────── */
+.origin-dot,
+.dest-dot {
+  r: 2.5;
+  opacity: 0.9;
+}
+
+.origin-dot.capture,
+.dest-dot.capture {
+  fill: var(--green);
+}
+
+.origin-dot.synthesis,
+.dest-dot.synthesis {
+  fill: var(--cyan);
+}
+
+.origin-dot.deploy,
+.dest-dot.deploy {
+  fill: var(--amber);
+}
+
+/* ── Pulse — subtle ring, no glow ────────────────── */
+.pulse {
+  fill: none;
+  stroke-width: 1;
+}
+
+.pulse.capture {
+  stroke: var(--green);
+}
+
+.pulse.synthesis {
+  stroke: var(--cyan);
+}
+
+.pulse.deploy {
+  stroke: var(--amber);
+}
+
+/* ── Log Panel ────────────────────────────────────── */
+.legend {
+  display: flex;
+  gap: 12px;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 0;
+  margin-right: 4px;
+  position: relative;
+  top: -1px;
+}
+
+.dot-green {
+  background: var(--green);
+}
+
+.dot-cyan {
+  background: var(--cyan);
+}
+
+.dot-amber {
+  background: var(--amber);
+}
+
+.tx-log {
+  list-style: none;
+  margin: 0;
+  padding: 8px 12px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.75rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(154, 154, 154, 0.2) transparent;
+}
+
+.tx-log::-webkit-scrollbar {
+  width: 4px;
+}
+
+.tx-log::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tx-log::-webkit-scrollbar-thumb {
+  background-color: rgba(154, 154, 154, 0.2);
+  border-radius: 0;
+}
+
+.tx-item {
+  padding: 8px;
+  line-height: 1.5;
+  border-left: 2px solid var(--border-subtle);
+  background: var(--surface);
+}
+
+.tx-item .meta {
+  color: var(--text-tertiary);
+  font-size: 0.6875rem;
+}
+
+.tx-item .agent {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.6875rem;
+}
+
+.tx-item.capture {
+  border-left-color: var(--green);
+}
+
+.tx-item.synthesis {
+  border-left-color: var(--cyan);
+}
+
+.tx-item.deploy {
+  border-left-color: var(--amber);
+}
+
+/* ── Footer ───────────────────────────────────────── */
+.terminal-footer {
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  border-top: 1px solid var(--border-subtle);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.accent {
+  color: var(--primary);
+}
+
+/* ── Responsive ───────────────────────────────────── */
+@media (max-width: 1080px) {
+  .layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 200px;
+  }
+}
+
+/* ── Reduced Motion ───────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
