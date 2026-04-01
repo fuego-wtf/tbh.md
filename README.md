@@ -1,10 +1,14 @@
 # tbh.md
 
-Open-source honesty registry and discovery surface for Graphyn modes/lenses/skills/MCP listings.
+Open-source discovery surface for Graphyn modes, lenses, skills, and MCP listings.
 
 ## Stack
 
-- React + TypeScript + Vite
+- React 19 + TypeScript + Vite
+
+## Deploy
+
+**Primary:** Cloudflare Pages.
 
 ## Local Development
 
@@ -19,22 +23,18 @@ Copy from `.env.example`:
 
 ```text
 VITE_TBH_CATALOG_URL=
-VITE_TBH_INSTALL_API_BASE=
-VITE_TBH_INSTALL_PATH=/api/tbh/install
-VITE_TBH_DEEPLINK_SCHEME=graphyn://install
 ```
+
+Only `VITE_TBH_CATALOG_URL` is needed — it points to the Backyard catalog API. When unset, the app falls back to static sample data.
 
 ## Route Map
 
-- `/find`
-- `/@owner`
-- `/@owner/:type/:slug`
-- `/manage`
-
-## Install behavior
-
-- Graphyn context (`?graphyn_auth=1`): attempts backend install API.
-- External context: command/deeplink fallback.
+| Path | Purpose |
+|------|---------|
+| `/find` | Browse listings |
+| `/@owner` | Owner profile |
+| `/@owner/:type/:slug` | Listing detail |
+| `/manage` | (Future — not yet active) |
 
 ## License
 

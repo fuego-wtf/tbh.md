@@ -9,16 +9,13 @@ interface DetailPageProps {
   type: 'mode' | 'lens' | 'skill' | 'mcp';
   slug: string;
   groups: Record<'modes' | 'lenses' | 'skills' | 'mcps', Listing[]>;
-  installState: any;
-  onInstall: (item: Listing) => void;
   onCopyCommand: (msg: string) => void;
   navigate: (route: RouteState) => void;
-  isGraphyn: boolean;
 }
 
 const TYPE_TO_GROUP = { mode: 'modes', lens: 'lenses', skill: 'skills', mcp: 'mcps' } as const;
 
-export default function DetailPage({ owner, type, slug, groups, installState, onInstall, onCopyCommand, navigate, isGraphyn }: DetailPageProps) {
+export default function DetailPage({ owner, type, slug, groups, onCopyCommand, navigate }: DetailPageProps) {
   const listing = useMemo(() => {
     const bucket = groups[TYPE_TO_GROUP[type]] || [];
     return bucket.find((x) => x.owner === owner && x.slug === slug) || null;
@@ -109,7 +106,7 @@ export default function DetailPage({ owner, type, slug, groups, installState, on
           </div>
 
           <div style={{ marginBottom: 20 }}>
-            <InstallCTA item={listing} installState={installState} onInstall={onInstall} onCopy={onCopyCommand} isGraphyn={isGraphyn} />
+            <InstallCTA item={listing} onCopy={onCopyCommand} />
           </div>
 
           <article style={{ border: '1px solid var(--tb-bdr)', borderRadius: 8, background: 'var(--tb-surface)' }}>

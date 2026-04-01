@@ -2,19 +2,16 @@ import type { Listing, RouteState } from '../../core/types';
 import { shouldIgnoreCardClick, installCmd } from '../../core/view-utils';
 import Breadcrumb from '../../components/Breadcrumb';
 import CommandBar from '../../components/CommandBar';
-import InstallCTA from '../../components/InstallCTA';
 
 interface OwnerPageProps {
   owner: string;
   groups: Record<'modes' | 'lenses' | 'skills' | 'mcps', Listing[]>;
   navigate: (route: RouteState) => void;
-  installStates: Record<string, any>;
   onInstall: (item: Listing) => void;
   onCopyCommand: (msg: string) => void;
-  isGraphyn: boolean;
 }
 
-export default function OwnerPage({ owner, groups, navigate, installStates, onInstall, onCopyCommand, isGraphyn }: OwnerPageProps) {
+export default function OwnerPage({ owner, groups, navigate, onInstall, onCopyCommand }: OwnerPageProps) {
   const listings = Object.values(groups).flat().filter((x) => x.owner === owner);
 
   return (
@@ -48,11 +45,6 @@ export default function OwnerPage({ owner, groups, navigate, installStates, onIn
               <div style={{ fontSize: 13, color: 'var(--tb-t2)', lineHeight: 1.5, marginBottom: 8 }}>{item.description}</div>
               <CommandBar command={installCmd(item.owner, item.slug)} onCopy={onCopyCommand} size={13} />
             </div>
-            {isGraphyn && (
-              <div style={{ flexShrink: 0, paddingTop: 2 }}>
-                <InstallCTA item={item} installState={installStates[item.id]} onInstall={onInstall} onCopy={onCopyCommand} compact isGraphyn={isGraphyn} />
-              </div>
-            )}
           </div>
         </article>
       ))}

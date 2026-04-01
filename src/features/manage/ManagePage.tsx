@@ -1,155 +1,107 @@
-import { useMemo, useState } from 'react';
-import type { Listing, RouteState } from '../../core/types';
+import type { RouteState } from '../../core/types';
+import { detectGraphynContext } from '../../core/graphyn-context';
 import Breadcrumb from '../../components/Breadcrumb';
 import CommandBar from '../../components/CommandBar';
-import { fmtInstalls, shouldIgnoreCardClick } from '../../core/view-utils';
 
-interface ManagePageProps {
-  groups: Record<'modes' | 'lenses' | 'skills' | 'mcps', Listing[]>;
-  navigate: (route: RouteState) => void;
-  onCopyCommand: (msg: string) => void;
-  isGraphyn: boolean;
-  graphynHandle: string | null;
+/* ------------------------------------------------------------------ */
+/*  Truth-gate types                                                  */
+/* ------------------------------------------------------------------ */
+
+interface ManageGateResult {
+  /** Whether the user is authenticated and listing APIs are wired. */
+  ready: boolean;
+  /** Contextual reason if not ready (empty string when ready). */
+  reason: string;
 }
 
-export default function ManagePage({ groups, navigate, onCopyCommand, isGraphyn, graphynHandle }: ManagePageProps) {
-  const [unpublishConfirm, setUnpublishConfirm] = useState<string | null>(null);
-  const [publishedItems, setPublishedItems] = useState<Record<string, { version?: string; unpublished?: boolean }>>({});
-  const [toast, setToast] = useState('');
+/* ------------------------------------------------------------------ */
+/*  enforceManageTruthGate                                            */
+/*                                                                    */
+/*  Honest readiness check for the /manage route.                     */
+/*  Returns `ready: true` ONLY when:                                   */
+/*    • a Graphyn host context is confirmed via detectGraphynContext,  */
+/*    • a user identity is resolved, AND                              */
+/*    • listing mutation APIs are reachable.                          */
+/*                                                                    */
+/*  Until the host-bridge handshake and listing backend are wired,    */
+/*  this function always returns `ready: false`.                      */
+/* ------------------------------------------------------------------ */
 
-  const showToast = (msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(''), 2400);
+export function enforceManageTruthGate(): ManageGateResult {
+  const ctx = detectGraphynContext();
+
+  if (!ctx.isGraphyn) {
+    return {
+      ready: false,
+      reason: 'Management is only available through Graphyn Desktop.',
+    };
+  }
+
+  if (!ctx.user) {
+    return {
+      ready: false,
+      reason: 'Sign in to manage your listings.',
+    };
+  }
+
+  // Listing mutation API readiness check.
+  // When the publish/unpublish backend endpoint exists, add a
+  // lightweight probe here (e.g. HEAD /api/listings or similar).
+  // Until then, even authenticated users land in the gate.
+  return {
+    ready: false,
+    reason: 'Listing management is not available yet.',
   };
+}
 
-  if (!isGraphyn || !graphynHandle) {
+/* ------------------------------------------------------------------ */
+/*  ManagePage                                                        */
+/* ------------------------------------------------------------------ */
+
+interface ManagePageProps {
+  navigate: (route: RouteState) => void;
+  onCopyCommand: (msg: string) => void;
+}
+
+export default function ManagePage({ navigate, onCopyCommand }: ManagePageProps) {
+  const gate = enforceManageTruthGate();
+
+  // --- Gated: auth or backend not ready ----------------------------
+  if (!gate.ready) {
     return (
       <main className="tbh-shell" style={{ paddingTop: 40, paddingBottom: 32, textAlign: 'center' }}>
-        <div style={{ fontSize: 14, color: 'var(--tb-t2)', marginBottom: 16 }}>Sign in to manage your listings.</div>
-        <CommandBar command="npx tbh login" onCopy={onCopyCommand} size={13} />
-        <div style={{ marginTop: 12, fontSize: 12, color: 'var(--tb-t3)' }}>
-          Or open tbh.md from inside Graphyn desktop for auto sign-in.
+        <Breadcrumb segments={[{ label: 'Find', route: { page: 'find' } }, { label: 'Manage' }]} navigate={navigate} />
+
+        <div style={{ maxWidth: 400, margin: '40px auto 0' }}>
+          <div style={{ fontSize: 14, color: 'var(--tb-t2)', marginBottom: 16 }}>
+            {gate.reason}
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--tb-t3)', marginBottom: 20 }}>
+            Manage and publish listings from Graphyn Desktop Settings.<br />
+            Web-based sign-in coming soon.
+          </div>
+          <CommandBar command="npx tbh login" onCopy={onCopyCommand} size={13} />
         </div>
       </main>
     );
   }
 
-  const mine = useMemo(() => Object.values(groups).flat().filter((x) => x.owner === graphynHandle), [groups, graphynHandle]);
-
-  const bumpVersion = (v = '1.0.0') => {
-    const [maj, min, patch] = v.split('.').map(Number);
-    return `${maj}.${min}.${(patch || 0) + 1}`;
-  };
-
+  // --- Ready: real auth + listing APIs available --------------------
+  // When enforceManageTruthGate returns ready: true this branch renders
+  // the actual management UI (listing cards, publish/unpublish actions).
+  // No fake local-state illusions — all mutations go through the API.
   return (
-    <main className="tbh-shell" style={{ paddingTop: 16, paddingBottom: 32 }}>
+    <main className="tbh-shell" style={{ paddingTop: 40, paddingBottom: 32, textAlign: 'center' }}>
       <Breadcrumb segments={[{ label: 'Find', route: { page: 'find' } }, { label: 'Manage' }]} navigate={navigate} />
 
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 16 }}>
-        <h1 className="tbh-section-h1" style={{ margin: 0, fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em' }}>Manage</h1>
-        <span style={{ fontSize: 13, color: 'var(--tb-t3)' }}>@{graphynHandle}</span>
+      <div style={{ maxWidth: 400, margin: '40px auto 0' }}>
+        <div style={{ fontSize: 14, color: 'var(--tb-t2)', marginBottom: 16 }}>
+          Your listings
+        </div>
+        <div style={{ fontSize: 13, color: 'var(--tb-t3)' }}>
+          {/* Listing management UI will be wired here when the API is ready. */}
+        </div>
       </div>
-
-      {mine.length === 0 ? (
-        <div style={{ padding: '32px 0', textAlign: 'center' }}>
-          <div style={{ fontSize: 13, color: 'var(--tb-t3)', marginBottom: 12 }}>No listings yet.</div>
-          <CommandBar command="npx tbh publish ./skill.md --type skill" onCopy={onCopyCommand} size={13} />
-        </div>
-      ) : (
-        mine.map((item) => {
-          const published = publishedItems[item.id];
-          const isUnpublished = published?.unpublished;
-          const nextVersion = bumpVersion(published?.version || item.version);
-
-          return (
-            <article
-              key={item.id}
-              className="tbh-card"
-              onClick={(e) => {
-                if (shouldIgnoreCardClick(e.target)) return;
-                navigate({ page: 'detail', owner: item.owner, type: item.type, slug: item.slug });
-              }}
-              style={{ padding: 14, marginBottom: 10, opacity: isUnpublished ? 0.5 : 1, cursor: 'pointer' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <button
-                  onClick={() => navigate({ page: 'detail', owner: item.owner, type: item.type, slug: item.slug })}
-                  style={{ border: 'none', padding: 0, background: 'transparent', color: 'var(--tb-t1)', fontSize: 16, fontWeight: 700, cursor: 'pointer', letterSpacing: '-0.01em' }}
-                >
-                  {item.slug}
-                </button>
-                <span style={{ fontSize: 11, color: 'var(--tb-t3)', border: '1px solid var(--tb-bdr)', borderRadius: 3, padding: '1px 5px' }}>{item.type}</span>
-                <span style={{ fontSize: 11, color: 'var(--tb-t3)', border: '1px solid var(--tb-bdr)', borderRadius: 3, padding: '1px 5px', fontFamily: 'JetBrains Mono, monospace' }}>
-                  v{published?.version || item.version}
-                </span>
-                {isUnpublished && (
-                  <span style={{ fontSize: 11, color: 'var(--tb-warn)', border: '1px solid var(--tb-bdr)', borderRadius: 3, padding: '1px 5px' }}>Unpublished</span>
-                )}
-                <span style={{ flex: 1 }} />
-                <span style={{ fontSize: 12, color: 'var(--tb-t3)' }}>{fmtInstalls(item.installs)} installs</span>
-              </div>
-
-              <div style={{ fontSize: 13, color: 'var(--tb-t2)', marginBottom: 10, lineHeight: 1.5 }}>{item.description}</div>
-
-              {!isUnpublished && (
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <button
-                    onClick={async () => {
-                      const url = item.url || `https://tbh.md/@${item.owner}/${item.type}/${item.slug}`;
-                      await navigator.clipboard.writeText(url);
-                      onCopyCommand(`Copied: ${url}`);
-                      showToast('Listing URL copied');
-                    }}
-                    style={{ border: '1px solid var(--tb-bdr)', background: 'transparent', color: 'var(--tb-t2)', borderRadius: 6, padding: '5px 10px', fontSize: 12, cursor: 'pointer' }}
-                  >
-                    Copy listing URL
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setPublishedItems((prev) => ({ ...prev, [item.id]: { version: bumpVersion(item.version) } }));
-                      showToast(`${item.slug} v${bumpVersion(item.version)} published`);
-                    }}
-                    style={{ border: '1px solid var(--tb-bdr)', background: 'transparent', color: 'var(--tb-t2)', borderRadius: 6, padding: '5px 10px', fontSize: 12, cursor: 'pointer' }}
-                  >
-                    Publish v{nextVersion}
-                  </button>
-
-                  {unpublishConfirm === item.id ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ fontSize: 12, color: 'var(--tb-t3)' }}>Unpublish from tbh.md?</span>
-                      <button onClick={() => setUnpublishConfirm(null)} style={{ border: 'none', background: 'transparent', color: 'var(--tb-t3)', fontSize: 12, cursor: 'pointer', padding: '4px 6px' }}>Cancel</button>
-                      <button
-                        onClick={() => {
-                          setPublishedItems((prev) => ({ ...prev, [item.id]: { unpublished: true } }));
-                          setUnpublishConfirm(null);
-                          showToast('Listing unpublished.');
-                        }}
-                        style={{ border: '1px solid var(--tb-bdr)', background: 'rgba(255,95,87,0.08)', color: 'var(--tb-err)', borderRadius: 6, padding: '4px 10px', fontSize: 12, cursor: 'pointer' }}
-                      >
-                        Unpublish
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => setUnpublishConfirm(item.id)}
-                      style={{ border: '1px solid var(--tb-bdr)', background: 'transparent', color: 'var(--tb-t3)', borderRadius: 6, padding: '5px 10px', fontSize: 12, cursor: 'pointer' }}
-                    >
-                      Unpublish
-                    </button>
-                  )}
-                </div>
-              )}
-            </article>
-          );
-        })
-      )}
-
-      {toast && (
-        <div style={{ position: 'fixed', left: '50%', bottom: 20, transform: 'translateX(-50%)', border: '1px solid var(--tb-bdr)', borderRadius: 6, background: 'var(--tb-surface)', color: 'var(--tb-t2)', fontSize: 12, padding: '7px 12px', zIndex: 10 }}>
-          {toast}
-        </div>
-      )}
     </main>
   );
 }

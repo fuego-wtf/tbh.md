@@ -2,20 +2,17 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CatalogSource, Listing, ListingType, RouteState } from '../../core/types';
 import { TYPE_ORDER, fmtInstalls, installCmd, shouldIgnoreCardClick } from '../../core/view-utils';
 import CommandBar from '../../components/CommandBar';
-import InstallCTA from '../../components/InstallCTA';
 
 interface FindPageProps {
   groups: Record<'modes' | 'lenses' | 'skills' | 'mcps', Listing[]>;
   generatedAt: string | null;
   source: CatalogSource;
   navigate: (route: RouteState) => void;
-  installStates: Record<string, any>;
   onInstall: (item: Listing) => void;
   onCopyCommand: (msg: string) => void;
-  isGraphyn: boolean;
 }
 
-export default function FindPage({ groups, generatedAt, source, navigate, installStates, onInstall, onCopyCommand, isGraphyn }: FindPageProps) {
+export default function FindPage({ groups, generatedAt, source, navigate, onInstall, onCopyCommand }: FindPageProps) {
   const [q, setQ] = useState('');
   const [type, setType] = useState<'all' | ListingType>('all');
   const [owner, setOwner] = useState('all');
@@ -51,10 +48,18 @@ export default function FindPage({ groups, generatedAt, source, navigate, instal
   const sourceDot = source === 'api' || source === 'network'
     ? 'var(--tb-ok)'
     : source === 'cache' || source === 'static-fallback'
-      ? 'var(--tb-warn)'
+      ? 'var(--tb-ok)'
       : source === 'unavailable'
         ? 'var(--tb-err)'
         : 'var(--tb-t3)';
+
+  const sourceLabel = source === 'api' || source === 'network'
+    ? 'Live'
+    : source === 'cache' || source === 'static-fallback'
+      ? 'Curated'
+      : source === 'unavailable'
+        ? 'Unavailable'
+        : 'Loading\u2026';
 
   const cliGroups = [
     { label: 'Discovery', cmds: ['npx tbh find [query]', 'npx tbh view @owner/slug'] },
@@ -115,15 +120,7 @@ export default function FindPage({ groups, generatedAt, source, navigate, instal
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
         <div style={{ width: 5, height: 5, borderRadius: '50%', background: sourceDot }} />
         <span style={{ fontSize: 11, color: 'var(--tb-t3)' }}>
-          {source === 'api' || source === 'network'
-            ? 'Live snapshot'
-            : source === 'cache'
-              ? 'Cached snapshot'
-              : source === 'static-fallback'
-                ? 'Static fallback snapshot'
-                : source === 'unavailable'
-                  ? 'Catalog unavailable'
-                  : 'Loading…'}
+          {sourceLabel} catalog
         </span>
         {generatedAt && <span style={{ fontSize: 11, color: 'var(--tb-t3)', marginLeft: 4 }}>{new Date(generatedAt).toLocaleDateString()}</span>}
       </div>
@@ -160,7 +157,6 @@ export default function FindPage({ groups, generatedAt, source, navigate, instal
         </div>
       ) : (
         filtered.map((item) => {
-          const install = installStates[item.id];
           const command = installCmd(item.owner, item.slug);
           return (
             <article
@@ -195,11 +191,6 @@ export default function FindPage({ groups, generatedAt, source, navigate, instal
                   </div>
                   <CommandBar command={command} onCopy={onCopyCommand} size={13} />
                 </div>
-                {isGraphyn && (
-                  <div style={{ flexShrink: 0, paddingTop: 2 }}>
-                    <InstallCTA item={item} installState={install} onInstall={onInstall} onCopy={onCopyCommand} compact isGraphyn={isGraphyn} />
-                  </div>
-                )}
               </div>
             </article>
           );

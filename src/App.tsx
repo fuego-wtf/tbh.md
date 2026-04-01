@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import type { InstallResult, Listing, RouteState } from './core/types';
-import { detectGraphynContext } from './core/graphyn-context';
+import { useEffect, useRef, useState } from 'react';
+import type { RouteState } from './core/types';
 import { providerRegistry } from './core/providers/registry';
 import { backendProvider } from './core/providers/backend-provider';
 import { staticProvider } from './core/providers/static-provider';
@@ -33,10 +32,9 @@ function useRoute() {
   return { route, navigate };
 }
 
-function Header({ navigate, currentPage, graphynDisplayName }: {
+function Header({ navigate, currentPage }: {
   navigate: (r: RouteState) => void;
   currentPage: RouteState['page'];
-  graphynDisplayName: string | null;
 }) {
   const navItem = (label: string, page: RouteState['page']) => (
     <button
@@ -65,24 +63,18 @@ function Header({ navigate, currentPage, graphynDisplayName }: {
 
         <div className="tbh-header-nav">
           {navItem('Find', 'find')}
-          {graphynDisplayName && navItem('Manage', 'manage')}
         </div>
 
         <span style={{ flex: 1 }} />
 
-        {graphynDisplayName ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--tb-ok)', flexShrink: 0 }} />
-            <span style={{ fontSize: 12, color: 'var(--tb-t3)' }}>{graphynDisplayName}</span>
-          </div>
-        ) : (
-          <button
-            onClick={() => navigator.clipboard.writeText('npx tbh login')}
-            style={{ border: '1px solid var(--tb-bdr)', background: 'transparent', color: 'var(--tb-t2)', borderRadius: 6, padding: '5px 10px', fontSize: 12, cursor: 'pointer' }}
-          >
-            Sign in
-          </button>
-        )}
+        <a
+          href="https://github.com/fuego-wtf/tbh.md"
+          target="_blank"
+          rel="noreferrer"
+          style={{ fontSize: 12, color: 'var(--tb-t3)', textDecoration: 'none', border: '1px solid var(--tb-bdr)', borderRadius: 6, padding: '5px 10px' }}
+        >
+          GitHub
+        </a>
       </div>
     </header>
   );
@@ -90,13 +82,10 @@ function Header({ navigate, currentPage, graphynDisplayName }: {
 
 export default function App() {
   const { route, navigate } = useRoute();
-  const graphyn = useMemo(() => detectGraphynContext(), []);
 
   const [snapshot, setSnapshot] = useState<any>({ generatedAt: null, groups: { modes: [], lenses: [], skills: [], mcps: [] } });
   const [source, setSource] = useState<any>('loading');
   const [toast, setToast] = useState('');
-  const [installStates, setInstallStates] = useState<Record<string, InstallResult>>({});
-  const installTimersRef = useRef<Record<string, ReturnType<typeof setInterval>>>({});
 
   useEffect(() => {
     try {
@@ -122,96 +111,24 @@ export default function App() {
     return () => clearTimeout(t);
   }, [toast]);
 
-  useEffect(() => {
-    return () => {
-      Object.values(installTimersRef.current).forEach((id) => clearInterval(id));
-    };
-  }, []);
-
   const onCopyCommand = (msg: string) => setToast(msg);
 
-  const onInstall = async (listing: Listing) => {
-    if (installStates[listing.id]?.status === 'installing') return;
-
-    setInstallStates((prev) => ({
-      ...prev,
-      [listing.id]: { status: 'installing', progress: 10 },
-    }));
-
-    const apiResult = await installListing(
-      { owner: listing.owner, type: listing.type, slug: listing.slug },
-      graphyn,
-    );
-
-    if (apiResult.status === 'error' && !graphyn.isGraphyn) {
-      setToast('External mode: use copy command / deep-link');
-      setInstallStates((prev) => ({ ...prev, [listing.id]: apiResult }));
-      return;
+  const onInstall = async (listing: import('./core/types').Listing) => {
+    const result = await installListing({
+      owner: listing.owner,
+      type: listing.type,
+      slug: listing.slug,
+    });
+    if (result.status === 'error') {
+      setToast(result.message ?? 'Install not available.');
     }
-
-    if (apiResult.status === 'error') {
-      setToast(apiResult.message ?? `${listing.name} install failed.`);
-      setInstallStates((prev) => ({ ...prev, [listing.id]: apiResult }));
-      return;
-    }
-
-    setInstallStates((prev) => ({
-      ...prev,
-      [listing.id]: {
-        status: apiResult.status || 'queued',
-        progress: apiResult.progress ?? 20,
-        installId: apiResult.installId,
-        message: apiResult.message,
-      },
-    }));
-
-    if (installTimersRef.current[listing.id]) clearInterval(installTimersRef.current[listing.id]);
-
-    installTimersRef.current[listing.id] = setInterval(() => {
-      setInstallStates((prev) => {
-        const cur = prev[listing.id];
-        if (!cur || (cur.status !== 'installing' && cur.status !== 'queued')) return prev;
-
-        const progress = Math.min((cur.progress ?? 0) + 22, 100);
-        if (progress >= 100) {
-          clearInterval(installTimersRef.current[listing.id]);
-          delete installTimersRef.current[listing.id];
-          setToast(`${listing.name} installed.`);
-          return {
-            ...prev,
-            [listing.id]: { ...cur, status: 'installed', progress: 100 },
-          };
-        }
-
-        return {
-          ...prev,
-          [listing.id]: {
-            ...cur,
-            status: 'installing',
-            progress,
-          },
-        };
-      });
-    }, 680);
   };
 
   const allByGroup = snapshot.groups;
 
-  const detailInstallState = route.page === 'detail'
-    ? Object.values(allByGroup).flat().find(
-      (x: any) => x.owner === route.owner && x.type === route.type && x.slug === route.slug,
-    )
-      ? installStates[
-        (Object.values(allByGroup).flat().find(
-          (x: any) => x.owner === route.owner && x.type === route.type && x.slug === route.slug,
-        ) as Listing).id
-      ]
-      : null
-    : null;
-
   return (
     <div className="tbh-web" style={{ minHeight: '100dvh', background: 'var(--tb-bg)', color: 'var(--tb-t1)' }}>
-      <Header navigate={navigate} currentPage={route.page} graphynDisplayName={graphyn.user?.displayName ?? null} />
+      <Header navigate={navigate} currentPage={route.page} />
 
       {route.page === 'find' && (
         <FindPage
@@ -219,10 +136,8 @@ export default function App() {
           generatedAt={snapshot.generatedAt}
           source={source}
           navigate={navigate}
-          installStates={installStates}
           onInstall={onInstall}
           onCopyCommand={onCopyCommand}
-          isGraphyn={graphyn.isGraphyn}
         />
       )}
 
@@ -231,10 +146,8 @@ export default function App() {
           owner={route.owner}
           groups={allByGroup}
           navigate={navigate}
-          installStates={installStates}
           onInstall={onInstall}
           onCopyCommand={onCopyCommand}
-          isGraphyn={graphyn.isGraphyn}
         />
       )}
 
@@ -244,21 +157,15 @@ export default function App() {
           type={route.type}
           slug={route.slug}
           groups={allByGroup}
-          installState={detailInstallState}
-          onInstall={onInstall}
           onCopyCommand={onCopyCommand}
           navigate={navigate}
-          isGraphyn={graphyn.isGraphyn}
         />
       )}
 
       {route.page === 'manage' && (
         <ManagePage
-          groups={allByGroup}
           navigate={navigate}
           onCopyCommand={onCopyCommand}
-          isGraphyn={graphyn.isGraphyn}
-          graphynHandle={graphyn.user?.handle ?? null}
         />
       )}
 

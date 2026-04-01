@@ -1,8 +1,18 @@
 /*
   Referrer-Policy: strict-origin-when-cross-origin
   X-Content-Type-Options: nosniff
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
   Permissions-Policy: camera=(), geolocation=(), microphone=()
   Content-Security-Policy: frame-ancestors 'self' https://graphyn.xyz https://*.graphyn.xyz
 
 /catalog/*
   Cache-Control: public, max-age=300
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex
+
+https://:version.:project.pages.dev/*
+  X-Robots-Tag: noindex
