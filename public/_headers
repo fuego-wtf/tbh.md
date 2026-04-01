@@ -1,0 +1,8 @@
+/*
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Content-Type-Options: nosniff
+  Permissions-Policy: camera=(), geolocation=(), microphone=()
+  Content-Security-Policy: frame-ancestors 'self' https://graphyn.xyz https://*.graphyn.xyz
+
+/catalog/*
+  Cache-Control: public, max-age=300
