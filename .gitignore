@@ -1,13 +1,5 @@
-# macOS
+node_modules/
+dist/
+.env
 .DS_Store
-
-# local editor / temp
-*.swp
-*.swo
-*.tmp
-
-# local logs
-*.log
-
-# local runtime folders
-.letta/
+.vscode/
