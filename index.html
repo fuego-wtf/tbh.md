@@ -3,43 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tbh.md // network monitor</title>
-    <link rel="stylesheet" href="./styles.css" />
-    <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js" defer></script>
-    <script src="./app.js" defer></script>
+    <title>tbh.md</title>
   </head>
   <body>
-    <main class="terminal">
-      <header class="terminal-header">
-        <div class="brand">tbh.md <span>// network monitor</span></div>
-        <div class="status-row">
-          <span class="pill">mode: <strong id="mode">demo</strong></span>
-          <span class="pill">socket: <strong id="socket-status">offline</strong></span>
-          <span class="pill">events: <strong id="event-count">0</strong></span>
-        </div>
-      </header>
-
-      <section class="layout">
-        <div class="map-panel">
-          <div class="panel-title">world map</div>
-          <svg id="map" viewBox="0 0 1280 720" preserveAspectRatio="xMidYMid meet" aria-label="World map network activity"></svg>
-        </div>
-
-        <aside class="log-panel">
-          <div class="panel-title">activity log</div>
-          <div class="legend">
-            <span><i class="dot dot-green"></i> capture</span>
-            <span><i class="dot dot-cyan"></i> synthesis</span>
-            <span><i class="dot dot-amber"></i> deploy</span>
-          </div>
-          <ul id="tx-log" class="tx-log" aria-live="polite"></ul>
-        </aside>
-      </section>
-
-      <footer class="terminal-footer">
-        <code>> listening for agent transactions — emit via <span class="accent">window.dispatchEvent(new CustomEvent('tbh:tx', { detail }))</span></code>
-      </footer>
-    </main>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

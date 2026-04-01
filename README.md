@@ -1,85 +1,41 @@
-# tbh.md — Terminal World Map Monitor
+# tbh.md
 
-`tbh.md` is a terminal-themed network monitor UI for the Graphon Lens ecosystem.
-It renders a live world map and blinks activity whenever an agent transaction/event appears on the network/protocol stream.
+Open-source honesty registry and discovery surface for Graphyn modes/lenses/skills/MCP listings.
 
-## Features
+## Stack
 
-- Terminal/CRT-inspired interface
-- World map visualization (D3 + TopoJSON)
-- Real-time transaction effects:
-  - source pulse
-  - destination pulse
-  - animated route between points
-- Live log panel with protocol + agent metadata
-- Multiple ingestion modes:
-  - demo simulator (default)
-  - WebSocket stream
-  - browser custom event API
+- React + TypeScript + Vite
 
-## Project Structure
-
-- `index.html` — app shell and layout
-- `styles.css` — terminal visual system + map/log styling
-- `app.js` — map rendering, event ingestion, blink animations
-
-## Run Locally
+## Local Development
 
 ```bash
-cd /Users/aysimaerdemirci/Developer/tbh.md
-python3 -m http.server 8080
+pnpm install
+pnpm run dev
 ```
 
-Open:
+## Environment
+
+Copy from `.env.example`:
 
 ```text
-http://localhost:8080
+VITE_TBH_CATALOG_URL=
+VITE_TBH_INSTALL_API_BASE=
+VITE_TBH_INSTALL_PATH=/api/tbh/install
+VITE_TBH_DEEPLINK_SCHEME=graphyn://install
 ```
 
-## Event Input Modes
+## Route Map
 
-### 1) Demo mode (default)
-If no WebSocket URL is provided, the app generates random traffic for visualization.
+- `/find`
+- `/@owner`
+- `/@owner/:type/:slug`
+- `/manage`
 
-### 2) WebSocket mode
-Pass a websocket endpoint in query params:
+## Install behavior
 
-```text
-http://localhost:8080?ws=ws://localhost:3001
-```
+- Graphyn context (`?graphyn_auth=1`): attempts backend install API.
+- External context: command/deeplink fallback.
 
-### 3) Custom event API (manual test)
-From browser DevTools:
+## License
 
-```js
-window.dispatchEvent(new CustomEvent("tbh:tx", {
-  detail: {
-    protocol: "capture", // capture | synthesis | deploy
-    agent: "agent-alpha",
-    source: [28.9784, 41.0082],
-    destination: [-74.006, 40.7128],
-    sourceLabel: "istanbul",
-    destinationLabel: "nyc",
-    timestamp: Date.now()
-  }
-}));
-```
-
-## Payload Schema
-
-```ts
-type TxEvent = {
-  protocol: "capture" | "synthesis" | "deploy";
-  agent: string;
-  source: [number, number];      // [longitude, latitude]
-  destination: [number, number]; // [longitude, latitude]
-  sourceLabel?: string;
-  destinationLabel?: string;
-  timestamp?: number;
-};
-```
-
-## Notes
-
-- This repository is currently intended for private beta iteration.
-- No backend service is required for basic demo operation.
+MIT
