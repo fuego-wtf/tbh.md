@@ -8,7 +8,7 @@ interface InstallCTAProps {
 }
 
 function installCmd(owner: string, slug: string, version: string | null = null): string {
-  const base = `npx @graphyn/tbh install @${owner}/${slug}`;
+  const base = `bunx @graphyn/tbh install @${owner}/${slug}`;
   return version && version !== 'latest' ? `${base}@${version}` : base;
 }
 

@@ -62,9 +62,9 @@ export default function FindPage({ groups, generatedAt, source, navigate, onInst
         : 'Loading\u2026';
 
   const cliGroups = [
-    { label: 'Discovery', cmds: ['npx @graphyn/tbh find [query]', 'npx @graphyn/tbh view @owner/slug'] },
-    { label: 'Install', cmds: ['npx @graphyn/tbh install @owner/slug', 'npx @graphyn/tbh install @owner/slug@1.2.0', 'npx @graphyn/tbh list', 'npx @graphyn/tbh remove @owner/slug'] },
-    { label: 'Account', cmds: ['npx @graphyn/tbh login', 'npx @graphyn/tbh whoami'] },
+    { label: 'Discovery', cmds: ['bunx @graphyn/tbh find [query]', 'bunx @graphyn/tbh view @owner/slug'] },
+    { label: 'Install', cmds: ['bunx @graphyn/tbh install @owner/slug', 'bunx @graphyn/tbh install @owner/slug@1.2.0', 'bunx @graphyn/tbh list', 'bunx @graphyn/tbh remove @owner/slug'] },
+    { label: 'Account', cmds: ['bunx @graphyn/tbh login', 'bunx @graphyn/tbh whoami'] },
   ];
 
   return (
@@ -72,7 +72,7 @@ export default function FindPage({ groups, generatedAt, source, navigate, onInst
       <div className="tbh-search-row">
         <div className="tbh-search-wrap" style={{ flex: 1, minWidth: 200, display: 'flex', alignItems: 'center', gap: 8, border: '1px solid var(--tb-bdr)', borderRadius: 6, padding: '7px 10px', background: 'var(--tb-surface)' }}>
           <span style={{ color: 'var(--tb-t3)', fontSize: 12 }}>$</span>
-          <span style={{ color: 'var(--tb-t3)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'nowrap' }}>npx @graphyn/tbh find</span>
+          <span style={{ color: 'var(--tb-t3)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'nowrap' }}>bunx @graphyn/tbh find</span>
           <input
             ref={searchRef}
             value={q}
@@ -127,7 +127,7 @@ export default function FindPage({ groups, generatedAt, source, navigate, onInst
 
       {showCli && (
         <div style={{ border: '1px solid var(--tb-bdr)', borderRadius: 8, background: 'var(--tb-surface)', padding: 12, marginBottom: 12 }}>
-          <div style={{ fontSize: 12, color: 'var(--tb-t3)', marginBottom: 10 }}>CLI reference — <code style={{ fontFamily: 'JetBrains Mono, monospace' }}>npx @graphyn/tbh &lt;command&gt;</code></div>
+          <div style={{ fontSize: 12, color: 'var(--tb-t3)', marginBottom: 10 }}>CLI reference — <code style={{ fontFamily: 'JetBrains Mono, monospace' }}>bunx @graphyn/tbh &lt;command&gt;</code></div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
             {cliGroups.map((group) => (
               <div key={group.label}>

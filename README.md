@@ -28,12 +28,24 @@ pnpm run build:cli
 node cli-dist/cli.js --help
 ```
 
-Target usage after publish:
+Preferred usage after publish (Bun):
 
 ```bash
-npx @graphyn/tbh find code-review
-npx @graphyn/tbh view @graphyn/code-review
-npx @graphyn/tbh install @graphyn/code-review
+bunx @graphyn/tbh find code-review
+bunx @graphyn/tbh view @graphyn/code-review
+bunx @graphyn/tbh install @graphyn/code-review
+```
+
+Alternative usage:
+
+```bash
+pnpm dlx @graphyn/tbh find code-review
+pnpm dlx @graphyn/tbh view @graphyn/code-review
+pnpm dlx @graphyn/tbh install @graphyn/code-review
+
+# npm fallback
+npm exec --yes --package @graphyn/tbh -- tbh find code-review
+npm exec --yes --package @graphyn/tbh -- tbh install @graphyn/code-review
 ```
 
 Current truth contract:

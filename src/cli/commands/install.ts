@@ -46,7 +46,7 @@ export async function runInstallCommand(rawTarget: string | null): Promise<CliRe
       code: 2,
       message: installResponse.message,
       data: {
-        fallback: `npx @graphyn/tbh view @${listing.owner}/${listing.slug}`,
+        fallback: `bunx @graphyn/tbh view @${listing.owner}/${listing.slug}`,
       },
     };
   }
