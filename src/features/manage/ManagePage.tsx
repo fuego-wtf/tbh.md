@@ -80,7 +80,7 @@ export default function ManagePage({ navigate, onCopyCommand }: ManagePageProps)
             Manage and publish listings from Graphyn Desktop Settings.<br />
             Web-based sign-in coming soon.
           </div>
-          <CommandBar command="npx tbh login" onCopy={onCopyCommand} size={13} />
+          <CommandBar command="npx @graphyn/tbh login" onCopy={onCopyCommand} size={13} />
         </div>
       </main>
     );
