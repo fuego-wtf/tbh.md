@@ -9,7 +9,9 @@
   "files": [
     "cli-dist",
     "bin",
-    "public/catalog/index.json",
+    "public/catalog",
+    "public/artifacts",
+    "public/manifests",
     "README.md",
     "LICENSE"
   ],
@@ -24,7 +26,8 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "cli": "node cli-dist/cli.js",
-    "prepublishOnly": "npm run build:cli"
+    "generate:catalog": "node scripts/generate-catalog-indexes.mjs",
+    "prepublishOnly": "npm run generate:catalog && npm run build:cli"
   },
   "dependencies": {
     "react": "^19.2.4",

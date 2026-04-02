@@ -24,6 +24,8 @@ ENVIRONMENT
   TBH_INSTALL_API_BASE         Optional install API base URL
   TBH_INSTALL_PATH             Optional install path (default: /api/tbh/install)
   TBH_INSTALL_DIR              Optional local install output directory
+  TBH_ARTIFACT_BASE_URL        Optional base URL for remote artifact resolution
+  TBH_INSTALL_TARGET           Install destination adapter (default|claude-code|codex|custom)
 
 REPO
   https://github.com/fuego-wtf/tbh.md

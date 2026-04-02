@@ -48,11 +48,23 @@ npm exec --yes --package @graphyn/tbh -- tbh find code-review
 npm exec --yes --package @graphyn/tbh -- tbh install @graphyn/code-review
 ```
 
+### Static-first install (v0.1.2+)
+
+Install is **backend-optional** and works from static artifacts by default.
+
+Strategy order:
+1. **API (optional override)** — attempted only when `TBH_INSTALL_API_BASE` is set and returns success.
+2. **Static artifact** — local/remote artifact resolver chain.
+3. **Generated** — if no artifact exists, CLI generates an install document from catalog metadata.
+
 Current truth contract:
 - CLI commands are executable.
-- Install works without backend via static artifact install fallback.
-- If `TBH_INSTALL_API_BASE` is configured, CLI prefers API install strategy.
-- Static fallback installs to `.tbh/installed` by default (override with `TBH_INSTALL_DIR`).
+- Install is backend-optional; without API it installs from static artifacts.
+- `TBH_ARTIFACT_BASE_URL` controls optional remote static host.
+- `TBH_INSTALL_TARGET` accepts: `default | claude-code | codex | custom`.
+- `TBH_INSTALL_DIR` sets install root for `default`, and is required for `custom`.
+- `TBH_INSTALL_API_BASE` enables optional API strategy; failure degrades to static.
+- Integrity: SHA-256 hash returned in every install payload (`integrity` field).
 
 ## Environment
 
@@ -68,6 +80,8 @@ Only `VITE_TBH_CATALOG_URL` is needed — it points to the Backyard catalog API.
 
 ```text
 TBH_CATALOG_URL=
+TBH_ARTIFACT_BASE_URL=https://tbh.md
+TBH_INSTALL_TARGET=default
 TBH_INSTALL_API_BASE=
 TBH_INSTALL_PATH=/api/tbh/install
 TBH_INSTALL_DIR=

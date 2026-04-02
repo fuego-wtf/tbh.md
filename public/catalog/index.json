@@ -9,7 +9,10 @@
         "slug": "code-review",
         "name": "Code Review",
         "version": "1.1.0",
-        "versions": ["1.1.0", "1.0.2"],
+        "versions": [
+          "1.1.0",
+          "1.0.2"
+        ],
         "provider": "graphyn",
         "owner": "graphyn",
         "description": "Structured PR review workflow mode.",
@@ -19,8 +22,14 @@
         "github_stars": 94,
         "first_seen": "2026-03-20",
         "audits": [
-          { "name": "Socket", "status": "PASS" },
-          { "name": "Snyk", "status": "PASS" }
+          {
+            "name": "Socket",
+            "status": "PASS"
+          },
+          {
+            "name": "Snyk",
+            "status": "PASS"
+          }
         ],
         "artifact_path": "/tbh/artifacts/graphyn/mode/code-review/MODE.md",
         "url": "https://tbh.md/@graphyn/mode/code-review"
@@ -34,7 +43,11 @@
         "slug": "figma-parser",
         "name": "Figma Parser",
         "version": "1.4.2",
-        "versions": ["1.4.2", "1.4.1", "1.3.9"],
+        "versions": [
+          "1.4.2",
+          "1.4.1",
+          "1.3.9"
+        ],
         "provider": "graphyn",
         "owner": "graphyn",
         "description": "Parse Figma URLs into component specs and token maps.",
@@ -44,8 +57,14 @@
         "github_stars": 301,
         "first_seen": "2026-02-11",
         "audits": [
-          { "name": "Socket", "status": "PASS" },
-          { "name": "Snyk", "status": "WARN" }
+          {
+            "name": "Socket",
+            "status": "PASS"
+          },
+          {
+            "name": "Snyk",
+            "status": "WARN"
+          }
         ],
         "artifact_path": "/tbh/artifacts/graphyn/lens/figma-parser/LENS.md",
         "url": "https://tbh.md/@graphyn/lens/figma-parser"
@@ -59,7 +78,11 @@
         "slug": "use-my-browser",
         "name": "use-my-browser",
         "version": "0.3.1",
-        "versions": ["0.3.1", "0.3.0", "0.2.8"],
+        "versions": [
+          "0.3.1",
+          "0.3.0",
+          "0.2.8"
+        ],
         "provider": "community",
         "owner": "xixu-me",
         "description": "Main browser automation strategy skill for nontrivial web work.",
@@ -69,9 +92,18 @@
         "github_stars": 7,
         "first_seen": "2026-03-28",
         "audits": [
-          { "name": "Gen Agent Trust Hub", "status": "FAIL" },
-          { "name": "Socket", "status": "PASS" },
-          { "name": "Snyk", "status": "WARN" }
+          {
+            "name": "Gen Agent Trust Hub",
+            "status": "FAIL"
+          },
+          {
+            "name": "Socket",
+            "status": "PASS"
+          },
+          {
+            "name": "Snyk",
+            "status": "WARN"
+          }
         ],
         "artifact_path": "/tbh/artifacts/xixu-me/skill/use-my-browser/SKILL.md",
         "install_behavior": "error_once",
@@ -84,7 +116,10 @@
         "slug": "pr-review",
         "name": "PR Review",
         "version": "1.1.0",
-        "versions": ["1.1.0", "1.0.5"],
+        "versions": [
+          "1.1.0",
+          "1.0.5"
+        ],
         "provider": "graphyn",
         "owner": "graphyn",
         "description": "Summarize diffs and produce actionable review notes.",
@@ -94,8 +129,14 @@
         "github_stars": 38,
         "first_seen": "2026-03-10",
         "audits": [
-          { "name": "Socket", "status": "PASS" },
-          { "name": "Snyk", "status": "PASS" }
+          {
+            "name": "Socket",
+            "status": "PASS"
+          },
+          {
+            "name": "Snyk",
+            "status": "PASS"
+          }
         ],
         "artifact_path": "/tbh/artifacts/graphyn/skill/pr-review/SKILL.md",
         "url": "https://tbh.md/@graphyn/skill/pr-review"
@@ -109,7 +150,10 @@
         "slug": "figma-mcp",
         "name": "Figma MCP",
         "version": "2.0.0",
-        "versions": ["2.0.0", "1.9.3"],
+        "versions": [
+          "2.0.0",
+          "1.9.3"
+        ],
         "provider": "openai",
         "owner": "graphyn",
         "description": "Design context connector for files, components, and tokens.",
@@ -119,12 +163,32 @@
         "github_stars": 112,
         "first_seen": "2026-02-02",
         "audits": [
-          { "name": "Socket", "status": "PASS" },
-          { "name": "Snyk", "status": "WARN" }
+          {
+            "name": "Socket",
+            "status": "PASS"
+          },
+          {
+            "name": "Snyk",
+            "status": "WARN"
+          }
         ],
         "artifact_path": "/tbh/artifacts/graphyn/mcp/figma-mcp/MCP.md",
         "url": "https://tbh.md/@graphyn/mcp/figma-mcp"
       }
     ]
-  }
+  },
+  "shards": [
+    {
+      "owner": "graphyn",
+      "path": "orgs/graphyn.json",
+      "count": 4,
+      "sha256": "7152a9ce01ea7e38755af88dfe8ccf4f8190f2d55d5b2a517632e37731864b29"
+    },
+    {
+      "owner": "xixu-me",
+      "path": "orgs/xixu-me.json",
+      "count": 1,
+      "sha256": "a92bfbc1011531ec4e1c112770e353b7b506ed0200d914456e58c97dc96b1490"
+    }
+  ]
 }

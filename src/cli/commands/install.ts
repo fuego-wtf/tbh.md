@@ -70,6 +70,9 @@ export async function runInstallCommand(rawTarget: string | null): Promise<CliRe
       installedPath: staticInstall.installedPath,
       integrity: staticInstall.integrity,
       source: staticInstall.source,
+      verified: staticInstall.verified,
+      manifestLocation: staticInstall.manifestLocation,
+      destinationAdapter: staticInstall.destinationAdapter,
     },
   };
 }

@@ -1,0 +1,45 @@
+{
+  "generatedAt": "2026-03-31T23:30:00.000Z",
+  "groups": {
+    "skills": [
+      {
+        "listing_id": "lst_skill_use_my_browser",
+        "entity_type": "skill",
+        "entity_id": "use-my-browser",
+        "slug": "use-my-browser",
+        "name": "use-my-browser",
+        "version": "0.3.1",
+        "versions": [
+          "0.3.1",
+          "0.3.0",
+          "0.2.8"
+        ],
+        "provider": "community",
+        "owner": "xixu-me",
+        "description": "Main browser automation strategy skill for nontrivial web work.",
+        "installs": 26900,
+        "weekly_installs": 26900,
+        "repository": "xixu-me/skills",
+        "github_stars": 7,
+        "first_seen": "2026-03-28",
+        "audits": [
+          {
+            "name": "Gen Agent Trust Hub",
+            "status": "FAIL"
+          },
+          {
+            "name": "Socket",
+            "status": "PASS"
+          },
+          {
+            "name": "Snyk",
+            "status": "WARN"
+          }
+        ],
+        "artifact_path": "/tbh/artifacts/xixu-me/skill/use-my-browser/SKILL.md",
+        "install_behavior": "error_once",
+        "url": "https://skills.sh/xixu-me/skills/use-my-browser"
+      }
+    ]
+  }
+}
