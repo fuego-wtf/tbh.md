@@ -1,4 +1,5 @@
 import { findListing, loadCatalogSnapshot } from "../runtime/catalog.js";
+import { installStaticArtifact } from "../runtime/artifact.js";
 import { loadCliEnv } from "../runtime/env.js";
 import { runInstallViaApi } from "../runtime/http.js";
 import type { CliResult } from "../runtime/output.js";
@@ -35,30 +36,40 @@ export async function runInstallCommand(rawTarget: string | null): Promise<CliRe
   }
 
   const env = loadCliEnv();
-  const installResponse = await runInstallViaApi(env, {
-    ...target,
-    type: listing.type,
-  });
+  if (env.installApiBase) {
+    const installResponse = await runInstallViaApi(env, {
+      ...target,
+      type: listing.type,
+    });
 
-  if (!installResponse.ok) {
-    return {
-      ok: false,
-      code: 2,
-      message: installResponse.message,
-      data: {
-        fallback: `bunx @graphyn/tbh view @${listing.owner}/${listing.slug}`,
-      },
-    };
+    if (installResponse.ok) {
+      return {
+        ok: true,
+        code: 0,
+        message: installResponse.message,
+        data: {
+          installId: installResponse.installId ?? null,
+          target: `@${listing.owner}/${listing.slug}`,
+          version: target.version ?? listing.version,
+          strategy: "api",
+        },
+      };
+    }
   }
+
+  const staticInstall = await installStaticArtifact(listing);
 
   return {
     ok: true,
     code: 0,
-    message: installResponse.message,
+    message: `Installed @${listing.owner}/${listing.slug} from static artifact bundle.`,
     data: {
-      installId: installResponse.installId ?? null,
       target: `@${listing.owner}/${listing.slug}`,
       version: target.version ?? listing.version,
+      strategy: "static-artifact",
+      installedPath: staticInstall.installedPath,
+      integrity: staticInstall.integrity,
+      source: staticInstall.source,
     },
   };
 }

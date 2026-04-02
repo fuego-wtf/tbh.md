@@ -50,8 +50,9 @@ npm exec --yes --package @graphyn/tbh -- tbh install @graphyn/code-review
 
 Current truth contract:
 - CLI commands are executable.
-- Install only returns success when a real install API is configured.
-- If install API is not configured, CLI returns an explicit unavailable message (no fake success).
+- Install works without backend via static artifact install fallback.
+- If `TBH_INSTALL_API_BASE` is configured, CLI prefers API install strategy.
+- Static fallback installs to `.tbh/installed` by default (override with `TBH_INSTALL_DIR`).
 
 ## Environment
 
@@ -69,6 +70,7 @@ Only `VITE_TBH_CATALOG_URL` is needed — it points to the Backyard catalog API.
 TBH_CATALOG_URL=
 TBH_INSTALL_API_BASE=
 TBH_INSTALL_PATH=/api/tbh/install
+TBH_INSTALL_DIR=
 ```
 
 ## Route Map

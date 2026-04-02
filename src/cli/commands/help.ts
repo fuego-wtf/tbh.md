@@ -23,6 +23,7 @@ ENVIRONMENT
   TBH_CATALOG_URL              Optional remote catalog endpoint
   TBH_INSTALL_API_BASE         Optional install API base URL
   TBH_INSTALL_PATH             Optional install path (default: /api/tbh/install)
+  TBH_INSTALL_DIR              Optional local install output directory
 
 REPO
   https://github.com/fuego-wtf/tbh.md

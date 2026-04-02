@@ -4,10 +4,11 @@
   "private": false,
   "type": "module",
   "bin": {
-    "tbh": "cli-dist/cli.js"
+    "tbh": "bin/cli.mjs"
   },
   "files": [
     "cli-dist",
+    "bin",
     "public/catalog/index.json",
     "README.md",
     "LICENSE"

@@ -2,6 +2,7 @@ export interface CliEnv {
   catalogUrl: string | null;
   installApiBase: string | null;
   installPath: string;
+  installDir: string | null;
 }
 
 function fromEnv(key: string): string | null {
@@ -16,6 +17,7 @@ export function loadCliEnv(): CliEnv {
     catalogUrl: fromEnv("TBH_CATALOG_URL"),
     installApiBase: fromEnv("TBH_INSTALL_API_BASE"),
     installPath: process.env.TBH_INSTALL_PATH?.trim() || "/api/tbh/install",
+    installDir: fromEnv("TBH_INSTALL_DIR"),
   };
 }
 
