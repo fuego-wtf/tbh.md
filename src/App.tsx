@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { RouteState } from './core/types';
 import { providerRegistry } from './core/providers/registry';
 import { backendProvider } from './core/providers/backend-provider';
@@ -25,6 +25,7 @@ function useRoute() {
 
   const navigate = (next: RouteState) => {
     const nextPath = toPath(next);
+    if (window.location.pathname === nextPath) return;
     window.history.pushState({}, '', nextPath);
     setRoute(parsePath(nextPath));
   };
@@ -87,6 +88,19 @@ export default function App() {
   const [source, setSource] = useState<any>('loading');
   const [toast, setToast] = useState('');
 
+  useLayoutEffect(() => {
+    if (typeof window === 'undefined') return;
+    const previous = window.history.scrollRestoration;
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    return () => {
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = previous;
+      }
+    };
+  }, []);
+
   useEffect(() => {
     try {
       providerRegistry.register(backendProvider);
@@ -110,6 +124,12 @@ export default function App() {
     const t = setTimeout(() => setToast(''), 2200);
     return () => clearTimeout(t);
   }, [toast]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [route.page]);
 
   const onCopyCommand = (msg: string) => setToast(msg);
 

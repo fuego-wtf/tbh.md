@@ -64,4 +64,6 @@ export type RouteState =
 export interface GraphynContext {
   isGraphyn: boolean;
   user: { handle: string; displayName: string } | null;
+  authToken?: string | null;
+  idServiceUrl?: string | null;
 }

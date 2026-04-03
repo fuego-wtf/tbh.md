@@ -10,15 +10,49 @@ import type { GraphynContext } from './types';
  * Until the host bridge is wired, this always returns { isGraphyn: false }.
  */
 export function detectGraphynContext(): GraphynContext {
-  const isIframe = typeof window !== 'undefined' && window.parent !== window;
+  if (typeof window === 'undefined') {
+    return {
+      isGraphyn: false,
+      user: null,
+      authToken: null,
+      idServiceUrl: null,
+    };
+  }
 
-  // For now, we do NOT trust iframe context alone for authenticated features.
-  // The real Graphyn host bridge (follow-up) will confirm via postMessage handshake.
-  // Until then, always report non-Graphyn context to keep all UI honest.
-  void isIframe;
+  const hostContext = (window as Window & {
+    __GRAPHYN_TBH_CONTEXT__?: {
+      isGraphyn?: boolean;
+      authToken?: string;
+      idServiceUrl?: string;
+      user?: {
+        handle?: string;
+        displayName?: string;
+      };
+    };
+  }).__GRAPHYN_TBH_CONTEXT__;
+
+  if (hostContext?.isGraphyn === true) {
+    const hasValidUser = Boolean(
+      hostContext.user?.handle && hostContext.user?.displayName,
+    );
+
+    return {
+      isGraphyn: true,
+      user: hasValidUser
+        ? {
+          handle: hostContext.user!.handle!,
+          displayName: hostContext.user!.displayName!,
+        }
+        : null,
+      authToken: hostContext.authToken || null,
+      idServiceUrl: hostContext.idServiceUrl || null,
+    };
+  }
 
   return {
     isGraphyn: false,
     user: null,
+    authToken: null,
+    idServiceUrl: null,
   };
 }

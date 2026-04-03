@@ -17,11 +17,30 @@ export default function FindPage({ groups, generatedAt, source, navigate, onInst
   const [type, setType] = useState<'all' | ListingType>('all');
   const [owner, setOwner] = useState('all');
   const [showCli, setShowCli] = useState(false);
-  const searchRef = useRef<HTMLInputElement>(null);
+  const searchTopRef = useRef<HTMLInputElement>(null);
+  const searchBottomRef = useRef<HTMLInputElement>(null);
+
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(max-width: 640px)').matches;
+  });
 
   useEffect(() => {
-    searchRef.current?.focus();
+    const media = window.matchMedia('(max-width: 640px)');
+    const onChange = (event: MediaQueryListEvent) => setIsMobile(event.matches);
+    if (typeof media.addEventListener === 'function') media.addEventListener('change', onChange);
+    else media.addListener(onChange);
+
+    return () => {
+      if (typeof media.removeEventListener === 'function') media.removeEventListener('change', onChange);
+      else media.removeListener(onChange);
+    };
   }, []);
+
+  useEffect(() => {
+    if (isMobile) searchBottomRef.current?.focus();
+    else searchTopRef.current?.focus();
+  }, [isMobile]);
 
   const all = useMemo(() => Object.values(groups).flat(), [groups]);
 
@@ -68,25 +87,8 @@ export default function FindPage({ groups, generatedAt, source, navigate, onInst
   ];
 
   return (
-    <main className="tbh-shell" style={{ paddingTop: 16, paddingBottom: 32 }}>
+    <main className="tbh-shell" style={{ paddingTop: 16, paddingBottom: 32 }} data-find-main="true">
       <div className="tbh-search-row">
-        <div className="tbh-search-wrap" style={{ flex: 1, minWidth: 200, display: 'flex', alignItems: 'center', gap: 8, border: '1px solid var(--tb-bdr)', borderRadius: 6, padding: '7px 10px', background: 'var(--tb-surface)' }}>
-          <span style={{ color: 'var(--tb-t3)', fontSize: 12 }}>$</span>
-          <span style={{ color: 'var(--tb-t3)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'nowrap' }}>bunx @graphyn/tbh find</span>
-          <input
-            ref={searchRef}
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="[query]"
-            style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', color: 'var(--tb-t1)', fontSize: 13, fontFamily: 'JetBrains Mono, monospace' }}
-          />
-          {q && (
-            <button onClick={() => setQ('')} style={{ border: 'none', background: 'transparent', color: 'var(--tb-t3)', fontSize: 12, cursor: 'pointer', padding: 0, lineHeight: 1 }}>
-              ✕
-            </button>
-          )}
-        </div>
-
         <button
           onClick={() => {
             const opts: Array<'all' | ListingType> = ['all', ...TYPE_ORDER];
@@ -115,6 +117,23 @@ export default function FindPage({ groups, generatedAt, source, navigate, onInst
         >
           CLI
         </button>
+      </div>
+
+      <div className="tbh-search-wrap tbh-search-wrap-top" style={{ minWidth: 200, alignItems: 'center', gap: 8, border: '1px solid var(--tb-bdr)', borderRadius: 6, padding: '7px 10px', background: 'var(--tb-surface)', marginBottom: 12 }}>
+        <span style={{ color: 'var(--tb-t3)', fontSize: 12 }}>$</span>
+        <span style={{ color: 'var(--tb-t3)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'nowrap' }}>bunx @graphyn/tbh find</span>
+        <input
+          ref={searchTopRef}
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="[query]"
+          style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', color: 'var(--tb-t1)', fontSize: 13, fontFamily: 'JetBrains Mono, monospace' }}
+        />
+        {q && (
+          <button onClick={() => setQ('')} style={{ border: 'none', background: 'transparent', color: 'var(--tb-t3)', fontSize: 12, cursor: 'pointer', padding: 0, lineHeight: 1 }}>
+            ✕
+          </button>
+        )}
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
@@ -196,6 +215,25 @@ export default function FindPage({ groups, generatedAt, source, navigate, onInst
           );
         })
       )}
+
+      <div className="tbh-search-dock" aria-label="Mobile search dock">
+        <div className="tbh-search-wrap tbh-search-wrap-bottom" style={{ minWidth: 200, alignItems: 'center', gap: 8, border: '1px solid var(--tb-bdr)', borderRadius: 8, padding: '9px 10px', background: 'var(--tb-surface)' }}>
+          <span style={{ color: 'var(--tb-t3)', fontSize: 12 }}>$</span>
+          <span style={{ color: 'var(--tb-t3)', fontSize: 12, fontFamily: 'JetBrains Mono, monospace', whiteSpace: 'nowrap' }}>bunx @graphyn/tbh find</span>
+          <input
+            ref={searchBottomRef}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="[query]"
+            style={{ flex: 1, border: 'none', outline: 'none', background: 'transparent', color: 'var(--tb-t1)', fontSize: 13, fontFamily: 'JetBrains Mono, monospace' }}
+          />
+          {q && (
+            <button onClick={() => setQ('')} style={{ border: 'none', background: 'transparent', color: 'var(--tb-t3)', fontSize: 12, cursor: 'pointer', padding: 0, lineHeight: 1 }}>
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
     </main>
   );
 }

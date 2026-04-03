@@ -1,4 +1,5 @@
 import type { InstallRequest, InstallResult } from './types';
+import { emitTbhNotificationSignal } from './notification-emitter';
 
 /**
  * Honest install client for tbh.md.
@@ -10,8 +11,19 @@ import type { InstallRequest, InstallResult } from './types';
  * to use the copy command or install from Graphyn Desktop.
  */
 export async function installListing(
-  _req: InstallRequest,
+  req: InstallRequest,
 ): Promise<InstallResult> {
+  void emitTbhNotificationSignal({
+    signal: 'install_attempt',
+    detail: 'Install request received in tbh.md web client.',
+    metadata: {
+      owner: req.owner,
+      slug: req.slug,
+      type: req.type,
+      version: req.version ?? null,
+    },
+  });
+
   return {
     status: 'error',
     message: 'Install from Graphyn Desktop or run the copy command in your terminal.',

@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import type { RouteState } from '../../core/types';
 import { detectGraphynContext } from '../../core/graphyn-context';
+import { emitTbhNotificationSignal } from '../../core/notification-emitter';
 import Breadcrumb from '../../components/Breadcrumb';
 import CommandBar from '../../components/CommandBar';
 
@@ -65,6 +67,19 @@ interface ManagePageProps {
 
 export default function ManagePage({ navigate, onCopyCommand }: ManagePageProps) {
   const gate = enforceManageTruthGate();
+
+  useEffect(() => {
+    void emitTbhNotificationSignal({
+      signal: 'manage_open',
+      detail: gate.ready
+        ? 'Manage page opened with ready context.'
+        : 'Manage page opened but blocked by truth gate.',
+      metadata: {
+        ready: gate.ready,
+        reason: gate.reason,
+      },
+    });
+  }, [gate.ready, gate.reason]);
 
   // --- Gated: auth or backend not ready ----------------------------
   if (!gate.ready) {
