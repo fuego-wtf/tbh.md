@@ -1,4 +1,5 @@
 import { detectGraphynContext } from './graphyn-context';
+import { captureEvent, captureException } from './telemetry';
 
 type EmitStatus = 'sent' | 'skipped_unauthenticated' | 'failed';
 
@@ -23,6 +24,10 @@ function resolveIdBaseUrl(explicitUrl?: string | null): string {
 export async function emitTbhNotificationSignal(input: EmitSignalInput): Promise<EmitSignalResult> {
   const ctx = detectGraphynContext();
   if (!ctx.isGraphyn || !ctx.authToken) {
+    captureEvent('feature.use', {
+      feature: 'product_signal.skipped_unauthenticated',
+      signal: input.signal,
+    });
     return {
       status: 'skipped_unauthenticated',
       reason: 'Authenticated Graphyn context was not detected.',
@@ -49,6 +54,10 @@ export async function emitTbhNotificationSignal(input: EmitSignalInput): Promise
   }).catch(() => null);
 
   if (!response) {
+    captureException('notification_ingest_unreachable', {
+      feature: 'product_signal.emit_failed',
+      signal: input.signal,
+    });
     return {
       status: 'failed',
       reason: 'Notification ingest request failed to reach ID service.',
@@ -57,11 +66,20 @@ export async function emitTbhNotificationSignal(input: EmitSignalInput): Promise
 
   if (!response.ok) {
     const reason = await response.text().catch(() => '');
+    captureException(reason || `notification_ingest_${response.status}`, {
+      feature: 'product_signal.emit_failed',
+      signal: input.signal,
+      status: response.status,
+    });
     return {
       status: 'failed',
       reason: reason || `Notification ingest failed (${response.status}).`,
     };
   }
 
+  captureEvent('feature.use', {
+    feature: 'product_signal.emitted',
+    signal: input.signal,
+  });
   return { status: 'sent' };
 }

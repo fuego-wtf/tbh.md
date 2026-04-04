@@ -6,11 +6,19 @@ import { staticProvider } from './core/providers/static-provider';
 import { loadCatalog } from './core/catalog-service';
 import { installListing } from './core/install-client';
 import { parsePath, toPath } from './core/source-parser';
+import { detectGraphynContext } from './core/graphyn-context';
 import FindPage from './features/find/FindPage';
 import OwnerPage from './features/owner/OwnerPage';
 import DetailPage from './features/detail/DetailPage';
 import ManagePage from './features/manage/ManagePage';
 import TbhAsciiLogo from './components/TbhAsciiLogo';
+import {
+  captureEvent,
+  captureException,
+  captureRouteView,
+  identifyUser,
+  resetUser,
+} from './core/telemetry';
 
 const ROUTES = { find: '/find', manage: '/manage' };
 
@@ -112,9 +120,20 @@ export default function App() {
 
   useEffect(() => {
     const load = async () => {
-      const result = await loadCatalog();
-      setSnapshot(result.snapshot);
-      setSource(result.source);
+      try {
+        const result = await loadCatalog();
+        setSnapshot(result.snapshot);
+        setSource(result.source);
+        captureEvent('feature.use', {
+          feature: 'catalog.loaded',
+          catalog_source: result.source,
+          groups: Object.keys(result.snapshot?.groups || {}).length,
+        }, { dedupeKey: 'catalog-loaded', dedupeMs: 5000 });
+      } catch (error) {
+        captureException(error, {
+          feature: 'catalog.load_failed',
+        }, { dedupeKey: 'catalog-load-failed' });
+      }
     };
     load();
   }, []);
@@ -131,17 +150,61 @@ export default function App() {
     document.body.scrollTop = 0;
   }, [route.page]);
 
-  const onCopyCommand = (msg: string) => setToast(msg);
+  useEffect(() => {
+    captureRouteView(toPath(route));
+  }, [route]);
+
+  useEffect(() => {
+    const ctx = detectGraphynContext();
+    if (ctx.isGraphyn && ctx.user?.handle) {
+      identifyUser(ctx.user.handle, {
+        display_name: ctx.user.displayName,
+      });
+      captureEvent('feature.use', {
+        feature: 'host_context.detected',
+        authenticated: Boolean(ctx.authToken),
+      }, { dedupeKey: 'host-context-detected', dedupeMs: 30000 });
+      return;
+    }
+    resetUser();
+  }, []);
+
+  const onCopyCommand = (msg: string) => {
+    captureEvent('feature.use', {
+      feature: 'command.copied',
+      route: route.page,
+    });
+    setToast(msg);
+  };
 
   const onInstall = async (listing: import('./core/types').Listing) => {
+    captureEvent('feature.use', {
+      feature: 'listing.install_clicked',
+      owner: listing.owner,
+      type: listing.type,
+      slug: listing.slug,
+    });
     const result = await installListing({
       owner: listing.owner,
       type: listing.type,
       slug: listing.slug,
     });
     if (result.status === 'error') {
+      captureException(result.message || 'install_failed', {
+        feature: 'listing.install_failed',
+        owner: listing.owner,
+        type: listing.type,
+        slug: listing.slug,
+      });
       setToast(result.message ?? 'Install not available.');
+      return;
     }
+    captureEvent('feature.use', {
+      feature: 'listing.install_sent',
+      owner: listing.owner,
+      type: listing.type,
+      slug: listing.slug,
+    });
   };
 
   const allByGroup = snapshot.groups;
