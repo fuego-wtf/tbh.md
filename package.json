@@ -30,6 +30,7 @@
     "prepublishOnly": "npm run generate:catalog && npm run build:cli"
   },
   "dependencies": {
+    "posthog-js": "^1.254.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },
