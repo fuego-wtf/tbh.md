@@ -21,9 +21,9 @@ export default function CommandBar({ command, onCopy, size = 14 }: CommandBarPro
   };
 
   return (
-    <div style={{ border: '1px solid var(--tb-bdr)', borderRadius: 6, padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(0,0,0,0.12)' }}>
-      <span style={{ color: 'var(--tb-t3)', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', userSelect: 'none' }}>$</span>
-      <code className="tbh-command-code" style={{ fontSize: size, color: 'var(--tb-t2)', fontFamily: 'JetBrains Mono, monospace' }}>{command}</code>
+    <div style={{ border: '1px solid var(--tb-bdr)', borderRadius: 6, padding: '8px 10px', display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(0,0,0,0.12)', minWidth: 0 }}>
+      <span style={{ color: 'var(--tb-t3)', fontSize: 13, fontFamily: 'JetBrains Mono, monospace', userSelect: 'none', flexShrink: 0 }}>$</span>
+      <code className="tbh-command-code" style={{ fontSize: size, color: 'var(--tb-t2)', fontFamily: 'JetBrains Mono, monospace', flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{command}</code>
       <button
         onClick={handleCopy}
         style={{
