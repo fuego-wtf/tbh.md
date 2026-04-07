@@ -44,6 +44,9 @@ export interface InstallRequest {
   type: ListingType;
   slug: string;
   version?: string;
+  listingId?: string;
+  sourceUrl?: string | null;
+  artifactPath?: string | null;
 }
 
 export type InstallState = 'idle' | 'queued' | 'installing' | 'installed' | 'error';
