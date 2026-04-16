@@ -1,0 +1,60 @@
+# @graphyn/tbh (tbh-md) llms.txt
+
+## Repository Identity
+- Project: `@graphyn/tbh`
+- Type: Discovery web app + distributable CLI
+- Primary role: open-source discovery/install surface for Graphyn modes, lenses, skills, and MCP listings
+
+## Backbone Operating Line
+- Wiring-first: install flows must remain executable without fabricated backend success.
+- Evidence-before-assertion: validate CLI and static artifact behavior with real commands.
+- Goal-first execution: isolate changes to catalog, install runtime, or UI route scope.
+
+## Stack
+- React 19 + TypeScript + Vite
+- Static catalog/artifact serving from `public/`
+- CLI build output under `cli-dist/` with launcher `bin/cli.mjs`
+
+## Critical Paths
+- `src/cli.ts`
+- `src/cli/commands/*`
+- `src/cli/runtime/*`
+- `src/core/providers/*`
+- `public/catalog/`, `public/artifacts/`, `public/manifests/`
+- `scripts/generate-catalog-indexes.mjs`
+
+## Install Strategy Contract (Static-First)
+1. Optional API path (`TBH_INSTALL_API_BASE`) when configured and healthy
+2. Static artifact resolution
+3. Generated install document fallback
+
+## Environment Contract
+- Web: `VITE_TBH_CATALOG_URL`
+- CLI: `TBH_CATALOG_URL`, `TBH_ARTIFACT_BASE_URL`, `TBH_INSTALL_TARGET`, `TBH_INSTALL_API_BASE`, `TBH_INSTALL_DIR`
+
+## Local Commands
+- Install: `pnpm install`
+- Web dev: `pnpm run dev`
+- Web build: `pnpm run build`
+- CLI build: `pnpm run build:cli`
+- Full build: `pnpm run build:all`
+- CLI run: `node cli-dist/cli.js --help`
+- Catalog refresh: `pnpm run generate:catalog`
+
+## Agent Workflow Checklist
+1. Preserve backend-optional install behavior.
+2. Update static manifests/artifacts when command behavior changes.
+3. Run `pnpm run build` and `pnpm run build:cli` for release-impacting changes.
+4. Validate key commands (`find`, `view`, `install`) after edits.
+
+## Dependency Docs (Reference)
+- React docs: https://react.dev/
+- Vite docs: https://vite.dev/guide/
+- TypeScript docs: https://www.typescriptlang.org/docs/
+- pnpm docs: https://pnpm.io/
+- npm package `bin` docs: https://docs.npmjs.com/cli/v10/configuring-npm/package-json#bin
+
+## Execution Guardrails
+- Keep published CLI contract stable (`tbh` binary + command semantics).
+- Preserve artifact integrity metadata (`integrity`/SHA-256 expectations).
+- Do not make API availability a hard requirement for install.
