@@ -1,60 +1,56 @@
-# @graphyn/tbh (tbh-md) llms.txt
+# tbh.md / @graphyn/tbh
 
-## Repository Identity
-- Project: `@graphyn/tbh`
-- Type: Discovery web app + distributable CLI
-- Primary role: open-source discovery/install surface for Graphyn modes, lenses, skills, and MCP listings
+## What This Repo Is
+`tbh.md` is Graphyn's open discovery layer for modes, lenses, skills, and installable surfaces.
+It is both a web discovery experience and a distributable CLI.
 
-## Backbone Operating Line
-- Wiring-first: install flows must remain executable without fabricated backend success.
-- Evidence-before-assertion: validate CLI and static artifact behavior with real commands.
-- Goal-first execution: isolate changes to catalog, install runtime, or UI route scope.
+## Core Value
+If Graphyn is the execution engine, `tbh` is the discovery and distribution index.
+It helps agents and developers find the right capability quickly, then install with minimal friction.
 
-## Stack
-- React 19 + TypeScript + Vite
-- Static catalog/artifact serving from `public/`
-- CLI build output under `cli-dist/` with launcher `bin/cli.mjs`
+## Who This Is For
+- agents searching for the best Graphyn capability match
+- developers exploring available skills and MCP surfaces
+- operators distributing install artifacts
+- ecosystem partners indexing Graphyn catalog metadata
 
-## Critical Paths
-- `src/cli.ts`
-- `src/cli/commands/*`
-- `src/cli/runtime/*`
-- `src/core/providers/*`
-- `public/catalog/`, `public/artifacts/`, `public/manifests/`
-- `scripts/generate-catalog-indexes.mjs`
+## Product Surface In This Repo
+- web routes for discovery and listing detail
+- CLI commands: `find`, `view`, `install`, `list`, `remove`, `whoami`
+- static catalog and artifact pipeline
 
-## Install Strategy Contract (Static-First)
-1. Optional API path (`TBH_INSTALL_API_BASE`) when configured and healthy
-2. Static artifact resolution
-3. Generated install document fallback
+## Install Strategy
+`install` is intentionally backend-optional:
+1. optional API strategy (when configured)
+2. static artifact strategy
+3. generated fallback strategy
 
-## Environment Contract
-- Web: `VITE_TBH_CATALOG_URL`
-- CLI: `TBH_CATALOG_URL`, `TBH_ARTIFACT_BASE_URL`, `TBH_INSTALL_TARGET`, `TBH_INSTALL_API_BASE`, `TBH_INSTALL_DIR`
+## Quickstart
+```bash
+pnpm install
+pnpm run dev
+pnpm run build
+pnpm run build:cli
+node cli-dist/cli.js --help
+```
 
-## Local Commands
-- Install: `pnpm install`
-- Web dev: `pnpm run dev`
-- Web build: `pnpm run build`
-- CLI build: `pnpm run build:cli`
-- Full build: `pnpm run build:all`
-- CLI run: `node cli-dist/cli.js --help`
-- Catalog refresh: `pnpm run generate:catalog`
+## Backbone Principles Applied Here
+- Wiring-first: install path must execute without fake backend assumptions.
+- Evidence-before-assertion: verify `find/view/install` behavior with command receipts.
+- Goal-first: keep discovery and install latency low.
 
-## Agent Workflow Checklist
-1. Preserve backend-optional install behavior.
-2. Update static manifests/artifacts when command behavior changes.
-3. Run `pnpm run build` and `pnpm run build:cli` for release-impacting changes.
-4. Validate key commands (`find`, `view`, `install`) after edits.
+## For Agents
+1. Keep CLI contract stable (`tbh` binary + command semantics).
+2. Preserve integrity metadata in install payloads.
+3. Do not hard-require backend availability for install.
 
-## Dependency Docs (Reference)
-- React docs: https://react.dev/
-- Vite docs: https://vite.dev/guide/
-- TypeScript docs: https://www.typescriptlang.org/docs/
-- pnpm docs: https://pnpm.io/
-- npm package `bin` docs: https://docs.npmjs.com/cli/v10/configuring-npm/package-json#bin
+## Public Links
+- Discovery: https://tbh.md/find
+- Product: https://graphyn.xyz
 
-## Execution Guardrails
-- Keep published CLI contract stable (`tbh` binary + command semantics).
-- Preserve artifact integrity metadata (`integrity`/SHA-256 expectations).
-- Do not make API availability a hard requirement for install.
+## Technical References
+- React: https://react.dev/
+- Vite: https://vite.dev/guide/
+- TypeScript: https://www.typescriptlang.org/docs/
+- pnpm: https://pnpm.io/
+- npm bin contract: https://docs.npmjs.com/cli/v10/configuring-npm/package-json#bin
