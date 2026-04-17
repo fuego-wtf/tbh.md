@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import type { RouteState } from './core/types';
+import type { GraphynContext, Listing, RouteState } from './core/types';
 import { providerRegistry } from './core/providers/registry';
 import { backendProvider } from './core/providers/backend-provider';
 import { staticProvider } from './core/providers/static-provider';
@@ -12,6 +12,7 @@ import OwnerPage from './features/owner/OwnerPage';
 import DetailPage from './features/detail/DetailPage';
 import ManagePage from './features/manage/ManagePage';
 import TbhAsciiLogo from './components/TbhAsciiLogo';
+import { ToastProvider, useToast } from './components/Toast';
 import {
   captureEvent,
   captureException,
@@ -41,10 +42,79 @@ function useRoute() {
   return { route, navigate };
 }
 
-function Header({ navigate, currentPage }: {
+/* ------------------------------------------------------------------ */
+/*  useGraphynContext — reactive context with sign-out support        */
+/* ------------------------------------------------------------------ */
+
+function useGraphynContext() {
+  const [ctx, setCtx] = useState<GraphynContext>(() => detectGraphynContext());
+  const [authVersion, setAuthVersion] = useState(0);
+
+  // Refresh context when authVersion changes (e.g. after sign-out clears window prop)
+  useEffect(() => {
+    setCtx(detectGraphynContext());
+  }, [authVersion]);
+
+  // Poll for context injection (race: header renders before Desktop injects)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const fresh = detectGraphynContext();
+      setCtx((prev) => {
+        if (prev.isGraphyn !== fresh.isGraphyn || prev.authToken !== fresh.authToken) {
+          return fresh;
+        }
+        return prev;
+      });
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  const signOut = () => {
+    // Clear the window context injected by Desktop
+    const w = window as Window & { __GRAPHYN_TBH_CONTEXT__?: unknown };
+    delete w.__GRAPHYN_TBH_CONTEXT__;
+    setAuthVersion((v) => v + 1);
+  };
+
+  const refresh = () => {
+    setAuthVersion((v) => v + 1);
+  };
+
+  return { ctx, signOut, refresh };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Header                                                            */
+/* ------------------------------------------------------------------ */
+
+function Header({
+  navigate,
+  currentPage,
+  ctx,
+  onSignOut,
+  toast,
+}: {
   navigate: (r: RouteState) => void;
   currentPage: RouteState['page'];
+  ctx: GraphynContext;
+  onSignOut: () => void;
+  toast: { success: (msg: string) => void; error: (msg: string) => void };
 }) {
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [userMenuOpen]);
+
   const navItem = (label: string, page: RouteState['page']) => (
     <button
       onClick={() => navigate({ page } as RouteState)}
@@ -72,9 +142,79 @@ function Header({ navigate, currentPage }: {
 
         <div className="tbh-header-nav">
           {navItem('Find', 'find')}
+          {ctx.isGraphyn && ctx.user && navItem('Manage', 'manage')}
         </div>
 
         <span style={{ flex: 1 }} />
+
+        {/* Auth region */}
+        {ctx.isGraphyn && ctx.user ? (
+          <div ref={menuRef} style={{ position: 'relative' }}>
+            <button
+              onClick={() => setUserMenuOpen((o) => !o)}
+              style={{
+                border: 'none',
+                background: 'transparent',
+                cursor: 'pointer',
+                padding: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              {/* Green dot + name */}
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--tb-ok)', flexShrink: 0 }} />
+              <span style={{ fontSize: 12, color: 'var(--tb-t3)' }}>{ctx.user.displayName}</span>
+            </button>
+
+            {/* Dropdown */}
+            {userMenuOpen && (
+              <div style={{
+                position: 'absolute',
+                right: 0,
+                top: '100%',
+                marginTop: 6,
+                background: 'var(--tb-surface)',
+                border: '1px solid var(--tb-bdr)',
+                borderRadius: 6,
+                padding: '4px 0',
+                minWidth: 140,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                zIndex: 20,
+              }}>
+                <button
+                  onClick={() => { setUserMenuOpen(false); onSignOut(); }}
+                  style={{
+                    border: 'none',
+                    background: 'transparent',
+                    color: 'var(--tb-t2)',
+                    fontSize: 12,
+                    cursor: 'pointer',
+                    padding: '6px 12px',
+                    width: '100%',
+                    textAlign: 'left',
+                  }}
+                >
+                  Sign out
+                </button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText('bunx @graphyn/tbh login');
+                toast.success('Copied login command');
+              } catch {
+                toast.error('Failed to copy command');
+              }
+            }}
+            style={{ border: '1px solid var(--tb-bdr)', background: 'transparent', color: 'var(--tb-t2)', borderRadius: 6, padding: '5px 10px', fontSize: 12, cursor: 'pointer' }}
+          >
+            Sign in
+          </button>
+        )}
 
         <a
           href="https://github.com/fuego-wtf/tbh.md"
@@ -89,12 +229,23 @@ function Header({ navigate, currentPage }: {
   );
 }
 
-export default function App() {
-  const { route, navigate } = useRoute();
+/* ------------------------------------------------------------------ */
+/*  AppInner (uses toast hook inside ToastProvider)                   */
+/* ------------------------------------------------------------------ */
 
-  const [snapshot, setSnapshot] = useState<any>({ generatedAt: null, groups: { modes: [], lenses: [], skills: [], mcps: [] } });
-  const [source, setSource] = useState<any>('loading');
-  const [toast, setToast] = useState('');
+function AppInner() {
+  const { route, navigate } = useRoute();
+  const { ctx, signOut, refresh } = useGraphynContext();
+  const toast = useToast();
+
+  const [snapshot, setSnapshot] = useState<{
+    generatedAt: string | null;
+    groups: Record<'modes' | 'lenses' | 'skills' | 'mcps', Listing[]>;
+  }>({
+    generatedAt: null,
+    groups: { modes: [], lenses: [], skills: [], mcps: [] },
+  });
+  const [source, setSource] = useState<import('./core/types').CatalogSource>('loading');
 
   useLayoutEffect(() => {
     if (typeof window === 'undefined') return;
@@ -139,12 +290,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(() => setToast(''), 2200);
-    return () => clearTimeout(t);
-  }, [toast]);
-
-  useEffect(() => {
     window.scrollTo(0, 0);
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
@@ -155,7 +300,6 @@ export default function App() {
   }, [route]);
 
   useEffect(() => {
-    const ctx = detectGraphynContext();
     if (ctx.isGraphyn && ctx.user?.handle) {
       identifyUser(ctx.user.handle, {
         display_name: ctx.user.displayName,
@@ -167,17 +311,17 @@ export default function App() {
       return;
     }
     resetUser();
-  }, []);
+  }, [ctx.isGraphyn, ctx.user, ctx.authToken]);
 
   const onCopyCommand = (msg: string) => {
     captureEvent('feature.use', {
       feature: 'command.copied',
       route: route.page,
     });
-    setToast(msg);
+    toast.success(msg);
   };
 
-  const onInstall = async (listing: import('./core/types').Listing) => {
+  const onInstall = async (listing: Listing) => {
     captureEvent('feature.use', {
       feature: 'listing.install_clicked',
       owner: listing.owner,
@@ -196,7 +340,7 @@ export default function App() {
         type: listing.type,
         slug: listing.slug,
       });
-      setToast(result.message ?? 'Install not available.');
+      toast.error(result.message ?? 'Install not available.');
       return;
     }
     captureEvent('feature.use', {
@@ -205,13 +349,19 @@ export default function App() {
       type: listing.type,
       slug: listing.slug,
     });
+    toast.success(`Install sent for @${listing.owner}/${listing.slug}`);
+  };
+
+  const handleSignOut = () => {
+    signOut();
+    navigate({ page: 'find' });
   };
 
   const allByGroup = snapshot.groups;
 
   return (
     <div className="tbh-web" style={{ minHeight: '100dvh', background: 'var(--tb-bg)', color: 'var(--tb-t1)' }}>
-      <Header navigate={navigate} currentPage={route.page} />
+      <Header navigate={navigate} currentPage={route.page} ctx={ctx} onSignOut={handleSignOut} toast={toast} />
 
       {route.page === 'find' && (
         <FindPage
@@ -241,6 +391,7 @@ export default function App() {
           slug={route.slug}
           groups={allByGroup}
           onCopyCommand={onCopyCommand}
+          onInstall={onInstall}
           navigate={navigate}
         />
       )}
@@ -249,14 +400,21 @@ export default function App() {
         <ManagePage
           navigate={navigate}
           onCopyCommand={onCopyCommand}
+          onAuthChange={refresh}
         />
       )}
-
-      {toast && (
-        <div style={{ position: 'fixed', left: '50%', bottom: 20, transform: 'translateX(-50%)', border: '1px solid var(--tb-bdr)', borderRadius: 6, background: 'var(--tb-surface)', color: 'var(--tb-t2)', fontSize: 12, padding: '7px 12px', zIndex: 10, pointerEvents: 'none' }}>
-          {toast}
-        </div>
-      )}
     </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  App — wraps AppInner with ToastProvider                           */
+/* ------------------------------------------------------------------ */
+
+export default function App() {
+  return (
+    <ToastProvider>
+      <AppInner />
+    </ToastProvider>
   );
 }
