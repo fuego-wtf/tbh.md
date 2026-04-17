@@ -1,29 +1,32 @@
 # tbh.md / @graphyn/tbh
 
-## What This Repo Is
-`tbh.md` is Graphyn's open discovery layer for modes, lenses, skills, and installable surfaces.
-It is both a web discovery experience and a distributable CLI.
+## TL;DR
+`tbh.md` is Graphyn's discovery and distribution layer.
+It helps people and agents find the right mode, lens, skill, or package, then install quickly.
 
-## Core Value
-If Graphyn is the execution engine, `tbh` is the discovery and distribution index.
-It helps agents and developers find the right capability quickly, then install with minimal friction.
+## Who Needs This
+- Developers discovering Graphyn capabilities by intent.
+- Operators distributing installable assets across teams.
+- Ecosystem partners indexing Graphyn catalog metadata.
+- Agents that need a low-friction capability lookup and install surface.
 
-## Who This Is For
-- agents searching for the best Graphyn capability match
-- developers exploring available skills and MCP surfaces
-- operators distributing install artifacts
-- ecosystem partners indexing Graphyn catalog metadata
+## What This Surface Delivers
+- Discovery web routes (`/find`, owner pages, listing detail).
+- Open CLI commands (`find`, `view`, `install`, `list`, `remove`, `whoami`).
+- Backend-optional install strategy with static and generated fallbacks.
 
-## Product Surface In This Repo
-- web routes for discovery and listing detail
-- CLI commands: `find`, `view`, `install`, `list`, `remove`, `whoami`
-- static catalog and artifact pipeline
+## Why This Matters For Graphyn
+Graphyn's value depends on fast capability discovery.
+`tbh` is the bridge between "I need X" and "X is installed and runnable."
 
-## Install Strategy
-`install` is intentionally backend-optional:
-1. optional API strategy (when configured)
-2. static artifact strategy
-3. generated fallback strategy
+## Install Strategy (Execution Order)
+1. Optional API strategy (if configured).
+2. Static artifact strategy.
+3. Generated fallback strategy.
+
+## Runtime Truth Boundaries
+- Install must keep working even without backend availability.
+- Integrity metadata is part of the install contract and must not be removed.
 
 ## Quickstart
 ```bash
@@ -33,16 +36,6 @@ pnpm run build
 pnpm run build:cli
 node cli-dist/cli.js --help
 ```
-
-## Backbone Principles Applied Here
-- Wiring-first: install path must execute without fake backend assumptions.
-- Evidence-before-assertion: verify `find/view/install` behavior with command receipts.
-- Goal-first: keep discovery and install latency low.
-
-## For Agents
-1. Keep CLI contract stable (`tbh` binary + command semantics).
-2. Preserve integrity metadata in install payloads.
-3. Do not hard-require backend availability for install.
 
 ## Public Links
 - Discovery: https://tbh.md/find
@@ -54,3 +47,9 @@ node cli-dist/cli.js --help
 - TypeScript: https://www.typescriptlang.org/docs/
 - pnpm: https://pnpm.io/
 - npm bin contract: https://docs.npmjs.com/cli/v10/configuring-npm/package-json#bin
+
+## For Agents
+1. Keep CLI command semantics stable.
+2. Preserve backend-optional install behavior.
+3. Preserve integrity/hash semantics in install payloads.
+4. Validate `find/view/install` behavior with command receipts.
