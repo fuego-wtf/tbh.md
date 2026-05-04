@@ -3,15 +3,15 @@
 ## Local setup
 
 ```bash
-pnpm install
-pnpm run dev
+bun install
+bun run dev
 ```
 
 ## Quality gate
 
 ```bash
-pnpm run typecheck
-pnpm run build
+bun run typecheck
+bun run build
 ```
 
 ## Principles

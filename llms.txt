@@ -30,10 +30,10 @@ Graphyn's value depends on fast capability discovery.
 
 ## Quickstart
 ```bash
-pnpm install
-pnpm run dev
-pnpm run build
-pnpm run build:cli
+bun install
+bun run dev
+bun run build
+bun run build:cli
 node cli-dist/cli.js --help
 ```
 
@@ -45,8 +45,7 @@ node cli-dist/cli.js --help
 - React: https://react.dev/
 - Vite: https://vite.dev/guide/
 - TypeScript: https://www.typescriptlang.org/docs/
-- pnpm: https://pnpm.io/
-- npm bin contract: https://docs.npmjs.com/cli/v10/configuring-npm/package-json#bin
+- Bun: https://bun.sh/docs
 
 ## For Agents
 1. Keep CLI command semantics stable.

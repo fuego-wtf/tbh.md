@@ -15,8 +15,8 @@ Repository: https://github.com/fuego-wtf/tbh.md
 ## Local Development
 
 ```bash
-pnpm install
-pnpm run dev
+bun install
+bun run dev
 ```
 
 ## CLI (Open Source)
@@ -24,7 +24,7 @@ pnpm run dev
 The repo now includes an executable CLI surface:
 
 ```bash
-pnpm run build:cli
+bun run build:cli
 node cli-dist/cli.js --help
 ```
 
@@ -39,13 +39,9 @@ bunx @graphyn/tbh install @graphyn/code-review
 Alternative usage:
 
 ```bash
-pnpm dlx @graphyn/tbh find code-review
-pnpm dlx @graphyn/tbh view @graphyn/code-review
-pnpm dlx @graphyn/tbh install @graphyn/code-review
-
-# npm fallback
-npm exec --yes --package @graphyn/tbh -- tbh find code-review
-npm exec --yes --package @graphyn/tbh -- tbh install @graphyn/code-review
+bun dlx @graphyn/tbh find code-review
+bun dlx @graphyn/tbh view @graphyn/code-review
+bun dlx @graphyn/tbh install @graphyn/code-review
 ```
 
 ### Static-first install (v0.1.2+)
