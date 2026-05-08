@@ -5,13 +5,14 @@ import Breadcrumb from '../../components/Breadcrumb';
 import CommandBar from '../../components/CommandBar';
 import CopyUrlButton from '../../components/CopyUrlButton';
 import EmptyState from '../../components/EmptyState';
+import InstallCTA from '../../components/InstallCTA';
 import StaggeredList from '../../components/StaggeredList';
 
 interface OwnerPageProps {
   owner: string;
   groups: Record<'modes' | 'lenses' | 'skills' | 'mcps', Listing[]>;
   navigate: (route: RouteState) => void;
-  onInstall: (item: Listing) => void;
+  onInstall: (item: Listing) => Promise<boolean>;
   onCopyCommand: (msg: string) => void;
 }
 
@@ -126,6 +127,13 @@ export default function OwnerPage({ owner, groups, navigate, onInstall, onCopyCo
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                     <CommandBar command={installCmd(item.owner, item.slug)} onCopy={onCopyCommand} size={13} />
+                    <InstallCTA
+                      item={item}
+                      onCopy={onCopyCommand}
+                      onInstall={onInstall}
+                      compact
+                      externalFallback={false}
+                    />
                     <CopyUrlButton item={item} onCopy={onCopyCommand} />
                   </div>
                 </div>

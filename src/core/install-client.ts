@@ -3,7 +3,7 @@ import { emitTbhNotificationSignal } from './notification-emitter';
 
 const TBH_HOST_INSTALL_REQUEST_TYPE = 'graphyn:tbh:install_listing';
 const TBH_HOST_INSTALL_RESULT_TYPE = 'graphyn:tbh:install_listing:result';
-const HOST_INSTALL_TIMEOUT_MS = 7000;
+const HOST_INSTALL_TIMEOUT_MS = 30000;
 
 interface HostInstallResultMessage {
   type: string;
@@ -62,9 +62,25 @@ async function installViaGraphynHost(req: InstallRequest): Promise<InstallResult
       if (payload.type !== TBH_HOST_INSTALL_RESULT_TYPE) return;
       if (payload.requestId !== requestId) return;
 
+      const result = normalizeHostInstallResult(payload);
+      if (result.status === 'queued' || result.status === 'installing') {
+        void emitTbhNotificationSignal({
+          signal: 'install_progress',
+          detail: result.message ?? `Install ${result.status}.`,
+          metadata: {
+            owner: req.owner,
+            slug: req.slug,
+            type: req.type,
+            status: result.status,
+            progress: result.progress ?? null,
+          },
+        });
+        return;
+      }
+
       window.clearTimeout(timeoutId);
       window.removeEventListener('message', handleResult);
-      resolve(normalizeHostInstallResult(payload));
+      resolve(result);
     };
 
     window.addEventListener('message', handleResult);

@@ -8,8 +8,9 @@ import { useToast } from './Toast';
 interface InstallCTAProps {
   item: Listing;
   onCopy?: (msg: string) => void;
-  onInstall?: (item: Listing) => Promise<void>;
+  onInstall?: (item: Listing) => Promise<boolean>;
   compact?: boolean;
+  externalFallback?: boolean;
 }
 
 function installCmd(owner: string, slug: string, version: string | null = null): string {
@@ -17,7 +18,13 @@ function installCmd(owner: string, slug: string, version: string | null = null):
   return version && version !== 'latest' ? `${base}@${version}` : base;
 }
 
-export default function InstallCTA({ item, onCopy, onInstall, compact = false }: InstallCTAProps) {
+export default function InstallCTA({
+  item,
+  onCopy,
+  onInstall,
+  compact = false,
+  externalFallback = true,
+}: InstallCTAProps) {
   const ctx = detectGraphynContext();
   const toast = useToast();
   const command = installCmd(item.owner, item.slug);
@@ -36,8 +43,10 @@ export default function InstallCTA({ item, onCopy, onInstall, compact = false }:
     setInstalling(true);
     try {
       if (onInstall) {
-        await onInstall(item);
-        setInstalled(true);
+        const didInstall = await onInstall(item);
+        if (didInstall) {
+          setInstalled(true);
+        }
       }
     } catch {
       toast.error('Install failed. Please try again.');
@@ -76,6 +85,10 @@ export default function InstallCTA({ item, onCopy, onInstall, compact = false }:
           {installing ? 'Installing\u2026' : installed ? 'Installed' : 'Install'}
         </button>
       );
+    }
+
+    if (!externalFallback) {
+      return null;
     }
 
     return (

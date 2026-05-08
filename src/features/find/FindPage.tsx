@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CatalogSource, Listing, ListingType, RouteState } from '../../core/types';
 import { TYPE_ORDER, fmtInstalls, installCmd, shouldIgnoreCardClick } from '../../core/view-utils';
 import CommandBar from '../../components/CommandBar';
+import CopyUrlButton from '../../components/CopyUrlButton';
+import InstallCTA from '../../components/InstallCTA';
 import SnapshotStatus from '../../components/SnapshotStatus';
 import CliReferencePanel from '../../components/CliReferencePanel';
 import EmptyState from '../../components/EmptyState';
@@ -13,7 +15,7 @@ interface FindPageProps {
   generatedAt: string | null;
   source: CatalogSource;
   navigate: (route: RouteState) => void;
-  onInstall: (item: Listing) => void;
+  onInstall: (item: Listing) => Promise<boolean>;
   onCopyCommand: (msg: string) => void;
 }
 
@@ -267,7 +269,17 @@ export default function FindPage({
                         </span>
                       )}
                     </div>
-                    <CommandBar command={command} onCopy={onCopyCommand} size={13} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <CommandBar command={command} onCopy={onCopyCommand} size={13} />
+                      <InstallCTA
+                        item={item}
+                        onCopy={onCopyCommand}
+                        onInstall={onInstall}
+                        compact
+                        externalFallback={false}
+                      />
+                      <CopyUrlButton item={item} onCopy={onCopyCommand} />
+                    </div>
                   </div>
                 </div>
               </article>

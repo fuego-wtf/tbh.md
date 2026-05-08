@@ -37,6 +37,7 @@ function fmtInstalls(n: number): string {
 interface ManagePageProps {
   navigate: (route: RouteState) => void;
   onCopyCommand: (msg: string) => void;
+  onActionError: (msg: string) => void;
   /** Called when auth state changes (e.g. after delete causes sign-out). */
   onAuthChange?: () => void;
 }
@@ -47,7 +48,7 @@ type FetchState = 'loading' | 'ready' | 'error';
 /*  ManagePage                                                        */
 /* ------------------------------------------------------------------ */
 
-export default function ManagePage({ navigate, onCopyCommand, onAuthChange }: ManagePageProps) {
+export default function ManagePage({ navigate, onCopyCommand, onActionError, onAuthChange }: ManagePageProps) {
   const ctx = detectGraphynContext();
 
   const [fetchState, setFetchState] = useState<FetchState>('loading');
@@ -123,6 +124,7 @@ export default function ManagePage({ navigate, onCopyCommand, onAuthChange }: Ma
       ownerHandle={ctx.user.handle}
       navigate={navigate}
       onCopyCommand={onCopyCommand}
+      onActionError={onActionError}
       onAuthChange={onAuthChange}
     />
   );
@@ -137,6 +139,7 @@ interface ManagePageInnerProps {
   ownerHandle: string;
   navigate: (route: RouteState) => void;
   onCopyCommand: (msg: string) => void;
+  onActionError: (msg: string) => void;
   onAuthChange?: () => void;
 }
 
@@ -145,6 +148,7 @@ function ManagePageInner({
   ownerHandle,
   navigate,
   onCopyCommand,
+  onActionError,
   onAuthChange,
 }: ManagePageInnerProps) {
   const [fetchState, setFetchState] = useState<FetchState>('loading');
@@ -155,12 +159,16 @@ function ManagePageInner({
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [publishedOverrides, setPublishedOverrides] = useState<Record<string, { version?: string; unpublished?: boolean }>>({});
   const [actionInProgress, setActionInProgress] = useState<string | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
 
   // ------ Fetch listings on mount ------
   useEffect(() => {
     let cancelled = false;
 
     const load = async () => {
+      fetchStateRef.current = 'loading';
+      setFetchState('loading');
+      setErrorMessage('');
       try {
         const data = await fetchMyListings(authToken);
         if (!cancelled) {
@@ -191,8 +199,7 @@ function ManagePageInner({
 
     load();
     return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authToken]);
+  }, [authToken, retryNonce]);
 
   // ------ Actions ------
   const handlePublish = useCallback(async (item: Listing) => {
@@ -208,13 +215,13 @@ function ManagePageInner({
       }));
       onCopyCommand(`${item.slug} v${nextVersion} published`);
     } catch (err) {
-      onCopyCommand(
+      onActionError(
         err instanceof ListingApiError ? err.message : 'Publish failed.',
       );
     } finally {
       setActionInProgress(null);
     }
-  }, [authToken, publishedOverrides, onCopyCommand]);
+  }, [authToken, publishedOverrides, onCopyCommand, onActionError]);
 
   const handleUnpublish = useCallback(async (itemId: string, slug: string) => {
     setActionInProgress(itemId);
@@ -227,13 +234,13 @@ function ManagePageInner({
       setUnpublishConfirm(null);
       onCopyCommand('Listing unpublished.');
     } catch (err) {
-      onCopyCommand(
+      onActionError(
         err instanceof ListingApiError ? err.message : 'Unpublish failed.',
       );
     } finally {
       setActionInProgress(null);
     }
-  }, [authToken, onCopyCommand]);
+  }, [authToken, onCopyCommand, onActionError]);
 
   const handleDelete = useCallback(async (item: Listing) => {
     setActionInProgress(item.id);
@@ -242,19 +249,23 @@ function ManagePageInner({
       setListings((prev) => prev.filter((l) => l.id !== item.id));
       onCopyCommand(`${item.slug} deleted.`);
     } catch (err) {
-      onCopyCommand(
+      onActionError(
         err instanceof ListingApiError ? err.message : 'Delete failed.',
       );
     } finally {
       setActionInProgress(null);
     }
-  }, [authToken, onCopyCommand]);
+  }, [authToken, onCopyCommand, onActionError]);
 
-  const handleCopyUrl = useCallback((item: Listing) => {
+  const handleCopyUrl = useCallback(async (item: Listing) => {
     const url = item.url || `https://tbh.md/@${item.owner}/${item.type}/${item.slug}`;
-    void navigator.clipboard.writeText(url);
-    onCopyCommand(`Copied: ${url}`);
-  }, [onCopyCommand]);
+    try {
+      await navigator.clipboard.writeText(url);
+      onCopyCommand(`Copied: ${url}`);
+    } catch {
+      onActionError('Copy failed.');
+    }
+  }, [onCopyCommand, onActionError]);
 
   // ------ Loading state ------
   if (fetchState === 'loading') {
@@ -275,11 +286,8 @@ function ManagePageInner({
           <div style={{ fontSize: 14, color: 'var(--tb-err)', marginBottom: 12 }}>{errorMessage}</div>
           <button
             onClick={() => {
-              if (onAuthChange) {
-                onAuthChange();
-              } else {
-                setErrorMessage('Unable to retry. Please reload the page.');
-              }
+              onAuthChange?.();
+              setRetryNonce((n) => n + 1);
             }}
             style={{ border: '1px solid var(--tb-bdr)', background: 'transparent', color: 'var(--tb-t2)', borderRadius: 6, padding: '6px 14px', fontSize: 12, cursor: 'pointer' }}
           >

@@ -6,7 +6,10 @@ import { staticProvider } from './core/providers/static-provider';
 import { loadCatalog } from './core/catalog-service';
 import { installListing } from './core/install-client';
 import { parsePath, toPath } from './core/source-parser';
-import { detectGraphynContext } from './core/graphyn-context';
+import {
+  detectGraphynContext,
+  requestGraphynHostContext,
+} from './core/graphyn-context';
 import FindPage from './features/find/FindPage';
 import OwnerPage from './features/owner/OwnerPage';
 import DetailPage from './features/detail/DetailPage';
@@ -54,6 +57,19 @@ function useGraphynContext() {
   useEffect(() => {
     setCtx(detectGraphynContext());
   }, [authVersion]);
+
+  // Ask Graphyn Desktop for host context when rendered in BrowserPane iframe mode.
+  useEffect(() => {
+    let cancelled = false;
+    void requestGraphynHostContext().then((fresh) => {
+      if (!cancelled && fresh) {
+        setCtx(fresh);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Poll for context injection (race: header renders before Desktop injects)
   useEffect(() => {
@@ -321,19 +337,34 @@ function AppInner() {
     toast.success(msg);
   };
 
-  const onInstall = async (listing: Listing) => {
+  const onInstall = async (listing: Listing): Promise<boolean> => {
     captureEvent('feature.use', {
       feature: 'listing.install_clicked',
       owner: listing.owner,
       type: listing.type,
       slug: listing.slug,
     });
+
+    if (listing.type !== 'lens') {
+      const message = `${listing.type} installs are not wired through Graphyn Desktop yet. Copy the command instead.`;
+      captureEvent('feature.use', {
+        feature: 'listing.install_unsupported',
+        owner: listing.owner,
+        type: listing.type,
+        slug: listing.slug,
+      });
+      toast.error(message);
+      return false;
+    }
+
     const result = await installListing({
       owner: listing.owner,
       type: listing.type,
       slug: listing.slug,
+      version: listing.version,
+      listingId: listing.id,
     });
-    if (result.status === 'error') {
+    if (result.status !== 'installed') {
       captureException(result.message || 'install_failed', {
         feature: 'listing.install_failed',
         owner: listing.owner,
@@ -341,7 +372,7 @@ function AppInner() {
         slug: listing.slug,
       });
       toast.error(result.message ?? 'Install not available.');
-      return;
+      return false;
     }
     captureEvent('feature.use', {
       feature: 'listing.install_sent',
@@ -349,7 +380,8 @@ function AppInner() {
       type: listing.type,
       slug: listing.slug,
     });
-    toast.success(`Install sent for @${listing.owner}/${listing.slug}`);
+    toast.success(`Installed @${listing.owner}/${listing.slug}`);
+    return true;
   };
 
   const handleSignOut = () => {
@@ -400,6 +432,7 @@ function AppInner() {
         <ManagePage
           navigate={navigate}
           onCopyCommand={onCopyCommand}
+          onActionError={(msg) => toast.error(msg)}
           onAuthChange={refresh}
         />
       )}

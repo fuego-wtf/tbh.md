@@ -12,7 +12,7 @@ interface DetailPageProps {
   slug: string;
   groups: Record<'modes' | 'lenses' | 'skills' | 'mcps', Listing[]>;
   onCopyCommand: (msg: string) => void;
-  onInstall?: (item: Listing) => Promise<void>;
+  onInstall?: (item: Listing) => Promise<boolean>;
   navigate: (route: RouteState) => void;
 }
 
