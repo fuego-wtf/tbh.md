@@ -9,24 +9,24 @@ const CLI_GROUPS = [
   {
     label: 'Discovery',
     cmds: [
-      'bunx @graphyn/tbh find [query]',
-      'bunx @graphyn/tbh view @owner/slug',
+      'bunx @tbh-md/cli find [query]',
+      'bunx @tbh-md/cli view @owner/slug',
     ],
   },
   {
     label: 'Install',
     cmds: [
-      'bunx @graphyn/tbh install @owner/slug',
-      'bunx @graphyn/tbh install @owner/slug@1.2.0',
-      'bunx @graphyn/tbh list',
-      'bunx @graphyn/tbh remove @owner/slug',
+      'bunx @tbh-md/cli install @owner/slug',
+      'bunx @tbh-md/cli install @owner/slug@1.2.0',
+      'bunx @tbh-md/cli list',
+      'bunx @tbh-md/cli remove @owner/slug',
     ],
   },
   {
     label: 'Account',
     cmds: [
-      'bunx @graphyn/tbh login',
-      'bunx @graphyn/tbh whoami',
+      'bunx @tbh-md/cli login',
+      'bunx @tbh-md/cli whoami',
     ],
   },
 ];
@@ -73,7 +73,7 @@ export default function CliReferencePanel({ onCopy }: CliReferencePanelProps) {
           <div style={{ fontSize: 12, color: 'var(--tb-t3)', marginBottom: 10 }}>
             CLI reference &mdash;{' '}
             <code style={{ fontFamily: 'JetBrains Mono, monospace' }}>
-              bunx @graphyn/tbh &lt;command&gt;
+              bunx @tbh-md/cli &lt;command&gt;
             </code>
           </div>
           <div

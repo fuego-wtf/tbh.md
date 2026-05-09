@@ -220,7 +220,7 @@ function Header({
           <button
             onClick={async () => {
               try {
-                await navigator.clipboard.writeText('bunx @graphyn/tbh login');
+                await navigator.clipboard.writeText('bunx @tbh-md/cli login');
                 toast.success('Copied login command');
               } catch {
                 toast.error('Failed to copy command');

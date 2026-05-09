@@ -31,17 +31,17 @@ node cli-dist/cli.js --help
 Preferred usage after publish (Bun):
 
 ```bash
-bunx @graphyn/tbh find code-review
-bunx @graphyn/tbh view @graphyn/code-review
-bunx @graphyn/tbh install @graphyn/code-review
+bunx @tbh-md/cli find code-review
+bunx @tbh-md/cli view @graphyn/code-review
+bunx @tbh-md/cli install @graphyn/code-review
 ```
 
 Alternative usage:
 
 ```bash
-bun dlx @graphyn/tbh find code-review
-bun dlx @graphyn/tbh view @graphyn/code-review
-bun dlx @graphyn/tbh install @graphyn/code-review
+bun dlx @tbh-md/cli find code-review
+bun dlx @tbh-md/cli view @graphyn/code-review
+bun dlx @tbh-md/cli install @graphyn/code-review
 ```
 
 ### Static-first install (v0.1.2+)

@@ -71,7 +71,7 @@ export default function ManagePage({ navigate, onCopyCommand, onActionError, onA
           <div style={{ fontSize: 13, color: 'var(--tb-t3)', marginBottom: 20 }}>
             Open tbh.md from inside Graphyn Desktop for auto sign-in.
           </div>
-          <CommandBar command="bunx @graphyn/tbh login" onCopy={onCopyCommand} size={13} />
+          <CommandBar command="bunx @tbh-md/cli login" onCopy={onCopyCommand} size={13} />
         </div>
       </main>
     );
@@ -91,7 +91,7 @@ export default function ManagePage({ navigate, onCopyCommand, onActionError, onA
             Manage and publish listings from Graphyn Desktop Settings.<br />
             Web-based sign-in coming soon.
           </div>
-          <CommandBar command="bunx @graphyn/tbh login" onCopy={onCopyCommand} size={13} />
+          <CommandBar command="bunx @tbh-md/cli login" onCopy={onCopyCommand} size={13} />
         </div>
       </main>
     );
@@ -110,7 +110,7 @@ export default function ManagePage({ navigate, onCopyCommand, onActionError, onA
           <div style={{ fontSize: 13, color: 'var(--tb-t3)', marginBottom: 20 }}>
             Your session is missing an auth token. Please restart from Graphyn Desktop.
           </div>
-          <CommandBar command="bunx @graphyn/tbh login" onCopy={onCopyCommand} size={13} />
+          <CommandBar command="bunx @tbh-md/cli login" onCopy={onCopyCommand} size={13} />
         </div>
       </main>
     );
@@ -313,7 +313,7 @@ function ManagePageInner({
           <div style={{ fontSize: 13, color: 'var(--tb-t3)', marginBottom: 12 }}>
             You haven&apos;t published any listings yet.
           </div>
-          <CommandBar command="bunx @graphyn/tbh publish ./skill.md --type skill" onCopy={onCopyCommand} size={13} />
+          <CommandBar command="bunx @tbh-md/cli publish ./skill.md --type skill" onCopy={onCopyCommand} size={13} />
         </div>
       ) : (
         listings.map((item) => {

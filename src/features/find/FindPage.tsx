@@ -108,7 +108,7 @@ export default function FindPage({
             whiteSpace: 'nowrap',
           }}
         >
-          bunx @graphyn/tbh find
+          bunx @tbh-md/cli find
         </span>
         <input
           ref={searchTopRef}
@@ -311,7 +311,7 @@ export default function FindPage({
               whiteSpace: 'nowrap',
             }}
           >
-            bunx @graphyn/tbh find
+            bunx @tbh-md/cli find
           </span>
           <input
             ref={searchBottomRef}

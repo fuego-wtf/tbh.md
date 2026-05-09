@@ -3,7 +3,7 @@ import type { ListingType } from './types';
 export const TYPE_ORDER: ListingType[] = ['mode', 'lens', 'skill', 'mcp'];
 
 export function installCmd(owner: string, slug: string, version: string | null = null): string {
-  const base = `bunx @graphyn/tbh install @${owner}/${slug}`;
+  const base = `bunx @tbh-md/cli install @${owner}/${slug}`;
   return version && version !== 'latest' ? `${base}@${version}` : base;
 }
 
