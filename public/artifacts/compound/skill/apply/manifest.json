@@ -1,0 +1,28 @@
+{
+  "$schema": "https://compounddd.com/schemas/startup-skill-manifest-v1.json",
+  "name": "startup-programs",
+  "version": "1.0.0",
+  "artifacts": [
+    {
+      "label": "SKILL.md",
+      "path": "/skills/startup-programs/SKILL.md",
+      "sha256": "52f075d2443a446119a2eace6706bbc9aba6a74e368908a6bc884c701f0c9520",
+      "size": 3197,
+      "contentType": "text/markdown; charset=utf-8"
+    },
+    {
+      "label": "schema.md",
+      "path": "/skills/startup-programs/references/schema.md",
+      "sha256": "dd6bb08ca61e4b598d1e20c32537c3ea80bd5f5265f48ac47759edc451c0a5aa",
+      "size": 4000,
+      "contentType": "text/markdown; charset=utf-8"
+    }
+  ],
+  "install": {
+    "commands": [
+      "mkdir -p .skills/startup-programs/references",
+      "curl -fsSL https://compounddd.com/skills/startup-programs/SKILL.md -o .skills/startup-programs/SKILL.md",
+      "curl -fsSL https://compounddd.com/skills/startup-programs/references/schema.md -o .skills/startup-programs/references/schema.md"
+    ]
+  }
+}

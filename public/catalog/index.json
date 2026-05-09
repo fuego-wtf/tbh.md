@@ -140,6 +140,33 @@
         ],
         "artifact_path": "/tbh/artifacts/graphyn/skill/pr-review/SKILL.md",
         "url": "https://tbh.md/@graphyn/skill/pr-review"
+      },
+      {
+        "listing_id": "lst_skill_apply",
+        "entity_type": "skill",
+        "entity_id": "apply",
+        "slug": "apply",
+        "name": "Apply",
+        "version": "1.0.0",
+        "versions": [
+          "1.0.0"
+        ],
+        "provider": "compound",
+        "owner": "compound",
+        "description": "Verified accelerator, grant, residency, and founder-program directory: 100 official-source-checked rows for choosing where to apply next.",
+        "installs": 0,
+        "weekly_installs": 0,
+        "repository": "fuego-wtf/compound",
+        "github_stars": null,
+        "first_seen": "2026-05-09",
+        "audits": [
+          {
+            "name": "Socket",
+            "status": "PASS"
+          }
+        ],
+        "artifact_path": "/tbh/artifacts/compound/skill/apply/SKILL.md",
+        "url": "https://compounddd.com/apply/skill/"
       }
     ],
     "mcps": [
@@ -178,6 +205,12 @@
     ]
   },
   "shards": [
+    {
+      "owner": "compound",
+      "path": "orgs/compound.json",
+      "count": 1,
+      "sha256": "ad038d9a8522fca852c97670f9754d93eeaeb302a9cc9d9ab795a6125902fe95"
+    },
     {
       "owner": "graphyn",
       "path": "orgs/graphyn.json",

@@ -1,0 +1,7 @@
+{
+  "$schema": "https://tbh.md/schemas/manifest-v1.json",
+  "artifactPath": "public/artifacts/compound/skill/apply/SKILL.md",
+  "sha256": "52f075d2443a446119a2eace6706bbc9aba6a74e368908a6bc884c701f0c9520",
+  "version": "1.0.0",
+  "listingId": "lst_skill_apply"
+}
