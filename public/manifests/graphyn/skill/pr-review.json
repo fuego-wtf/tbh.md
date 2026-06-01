@@ -1,7 +1,7 @@
 {
   "$schema": "https://tbh.md/schemas/manifest-v1.json",
   "artifactPath": "public/artifacts/graphyn/skill/pr-review/SKILL.md",
-  "sha256": "61fbffbcf8898b2c14b5685a9d0ecfee160677d6a1ee8a09a0c1d13bb9eb72a9",
+  "sha256": "e29c63ed97bfd789311bc10ed674981875d9cd7d8505aad02bf6482b300c56ff",
   "version": "1.1.0",
   "listingId": "lst_skill_pr_review"
 }
