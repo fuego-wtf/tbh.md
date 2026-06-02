@@ -13,6 +13,7 @@ import {
 import FindPage from './features/find/FindPage';
 import OwnerPage from './features/owner/OwnerPage';
 import DetailPage from './features/detail/DetailPage';
+import HandoffPage from './features/handoff/HandoffPage';
 import ManagePage from './features/manage/ManagePage';
 import TbhAsciiLogo from './components/TbhAsciiLogo';
 import { ToastProvider, useToast } from './components/Toast';
@@ -425,6 +426,15 @@ function AppInner() {
           onCopyCommand={onCopyCommand}
           onInstall={onInstall}
           navigate={navigate}
+        />
+      )}
+
+      {route.page === 'handoff' && (
+        <HandoffPage
+          token={route.token}
+          ctx={ctx}
+          navigate={navigate}
+          onCopyCommand={onCopyCommand}
         />
       )}
 

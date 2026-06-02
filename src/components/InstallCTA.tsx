@@ -30,6 +30,7 @@ export default function InstallCTA({
   const command = installCmd(item.owner, item.slug);
   const [installing, setInstalling] = useState(false);
   const [installed, setInstalled] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const isDesktop = ctx.isGraphyn;
   const installUrl = buildInstallUrl({
@@ -41,15 +42,20 @@ export default function InstallCTA({
   const handleInstall = async () => {
     if (installing || installed) return;
     setInstalling(true);
+    setErrorMessage(null);
     try {
       if (onInstall) {
         const didInstall = await onInstall(item);
         if (didInstall) {
           setInstalled(true);
+        } else {
+          setErrorMessage('Install did not complete. Retry or copy the command.');
         }
       }
     } catch {
-      toast.error('Install failed. Please try again.');
+      const message = 'Install failed. Please try again.';
+      setErrorMessage(message);
+      toast.error(message);
     } finally {
       setInstalling(false);
     }
@@ -82,7 +88,7 @@ export default function InstallCTA({
             whiteSpace: 'nowrap',
           }}
         >
-          {installing ? 'Installing\u2026' : installed ? 'Installed' : 'Install'}
+          {installing ? 'Installing\u2026' : installed ? 'Installed' : errorMessage ? 'Retry install' : 'Install'}
         </button>
       );
     }
@@ -154,8 +160,24 @@ export default function InstallCTA({
             transition: 'background 0.12s, border-color 0.12s',
           }}
         >
-          {installing ? 'Installing\u2026' : installed ? 'Installed' : 'Install'}
+          {installing ? 'Installing\u2026' : installed ? 'Installed' : errorMessage ? 'Retry install' : 'Install'}
         </button>
+        {errorMessage && !installed && (
+          <div
+            role="status"
+            style={{
+              border: '1px solid rgba(255, 80, 80, 0.35)',
+              borderRadius: 6,
+              padding: '7px 10px',
+              fontSize: 12,
+              color: 'var(--tb-err)',
+              background: 'rgba(255, 80, 80, 0.06)',
+              lineHeight: 1.45,
+            }}
+          >
+            {errorMessage}
+          </div>
+        )}
       </div>
     );
   }

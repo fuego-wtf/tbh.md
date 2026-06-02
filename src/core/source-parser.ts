@@ -9,6 +9,10 @@ export function parsePath(pathname: string): RouteState {
   if (path === ROUTES.manage) return { page: 'manage' };
 
   const parts = path.split('/').filter(Boolean);
+  if (parts.length === 2 && parts[0] === 'h' && isValidSlug(parts[1]!)) {
+    return { page: 'handoff', token: parts[1]! };
+  }
+
   if (parts.length === 1) {
     const owner = parts[0]!.replace(/^@/, '');
     return isValidOwner(owner) ? { page: 'owner', owner } : { page: 'find' };
@@ -29,6 +33,7 @@ export function parsePath(pathname: string): RouteState {
 export function toPath(route: RouteState): string {
   if (route.page === 'find') return ROUTES.find;
   if (route.page === 'manage') return ROUTES.manage;
+  if (route.page === 'handoff') return `/h/${route.token}`;
   if (route.page === 'owner') return `/@${route.owner}`;
   return `/@${route.owner}/${route.type}/${route.slug}`;
 }

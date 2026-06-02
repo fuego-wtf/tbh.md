@@ -61,6 +61,7 @@ export interface InstallResult {
 export type RouteState =
   | { page: 'find' }
   | { page: 'manage' }
+  | { page: 'handoff'; token: string }
   | { page: 'owner'; owner: string }
   | { page: 'detail'; owner: string; type: ListingType; slug: string };
 
