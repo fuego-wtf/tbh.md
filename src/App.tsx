@@ -257,10 +257,10 @@ function AppInner() {
 
   const [snapshot, setSnapshot] = useState<{
     generatedAt: string | null;
-    groups: Record<'modes' | 'lenses' | 'skills' | 'mcps', Listing[]>;
+    groups: Record<'modes' | 'lenses' | 'skills' | 'mcps' | 'states', Listing[]>;
   }>({
     generatedAt: null,
-    groups: { modes: [], lenses: [], skills: [], mcps: [] },
+    groups: { modes: [], lenses: [], skills: [], mcps: [], states: [] },
   });
   const [source, setSource] = useState<import('./core/types').CatalogSource>('loading');
 

@@ -10,7 +10,7 @@ import StaggeredList from '../../components/StaggeredList';
 
 interface OwnerPageProps {
   owner: string;
-  groups: Record<'modes' | 'lenses' | 'skills' | 'mcps', Listing[]>;
+  groups: Record<'modes' | 'lenses' | 'skills' | 'mcps' | 'states', Listing[]>;
   navigate: (route: RouteState) => void;
   onInstall: (item: Listing) => Promise<boolean>;
   onCopyCommand: (msg: string) => void;

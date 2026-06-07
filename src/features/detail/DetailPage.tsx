@@ -8,15 +8,15 @@ import EmptyState from '../../components/EmptyState';
 
 interface DetailPageProps {
   owner: string;
-  type: 'mode' | 'lens' | 'skill' | 'mcp';
+  type: 'mode' | 'lens' | 'skill' | 'mcp' | 'state';
   slug: string;
-  groups: Record<'modes' | 'lenses' | 'skills' | 'mcps', Listing[]>;
+  groups: Record<'modes' | 'lenses' | 'skills' | 'mcps' | 'states', Listing[]>;
   onCopyCommand: (msg: string) => void;
   onInstall?: (item: Listing) => Promise<boolean>;
   navigate: (route: RouteState) => void;
 }
 
-const TYPE_TO_GROUP = { mode: 'modes', lens: 'lenses', skill: 'skills', mcp: 'mcps' } as const;
+const TYPE_TO_GROUP = { mode: 'modes', lens: 'lenses', skill: 'skills', mcp: 'mcps', state: 'states' } as const;
 
 export default function DetailPage({
   owner,

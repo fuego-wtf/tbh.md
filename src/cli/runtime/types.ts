@@ -1,4 +1,4 @@
-export type ListingType = "mode" | "lens" | "skill" | "mcp";
+export type ListingType = "mode" | "lens" | "skill" | "mcp" | "state";
 
 export interface Listing {
   id: string;
@@ -45,7 +45,7 @@ export interface CatalogPayload {
 
 export interface CatalogSnapshot {
   generatedAt: string | null;
-  groups: Record<"modes" | "lenses" | "skills" | "mcps", Listing[]>;
+  groups: Record<"modes" | "lenses" | "skills" | "mcps" | "states", Listing[]>;
 }
 
 // --- Artifact source labels ---

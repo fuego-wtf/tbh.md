@@ -17,6 +17,7 @@ const GROUP_TO_TYPE: Record<keyof CatalogSnapshot["groups"], ListingType> = {
   lenses: "lens",
   skills: "skill",
   mcps: "mcp",
+  states: "state",
 };
 
 function toNumber(input: unknown, fallback = 0): number {
@@ -77,6 +78,7 @@ export async function loadCatalogSnapshot(): Promise<CatalogSnapshot> {
       lenses: normalizeGroup("lenses", parsed.groups?.lenses ?? []),
       skills: normalizeGroup("skills", parsed.groups?.skills ?? []),
       mcps: normalizeGroup("mcps", parsed.groups?.mcps ?? []),
+      states: normalizeGroup("states", parsed.groups?.states ?? []),
     },
   };
 
@@ -117,6 +119,7 @@ async function mergeShards(
       lenses: [...globalSnapshot.groups.lenses],
       skills: [...globalSnapshot.groups.skills],
       mcps: [...globalSnapshot.groups.mcps],
+      states: [...globalSnapshot.groups.states],
     },
   };
 
@@ -127,7 +130,7 @@ async function mergeShards(
       const shardPayload = await loadShardPayload(catalogBasePath, shard.path);
       if (!shardPayload) continue;
 
-      for (const group of ["modes", "lenses", "skills", "mcps"] as const) {
+      for (const group of ["modes", "lenses", "skills", "mcps", "states"] as const) {
         const items = normalizeGroup(group, shardPayload.groups?.[group] ?? []);
         for (const item of items) {
           const key = dedupeKey(item);

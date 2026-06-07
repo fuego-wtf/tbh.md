@@ -15,10 +15,11 @@ const GROUP_TO_TYPE: Record<GroupName, ListingType> = {
   lenses: 'lens',
   skills: 'skill',
   mcps: 'mcp',
+  states: 'state',
 };
 
 export function emptyGroups(): Record<GroupName, Listing[]> {
-  return { modes: [], lenses: [], skills: [], mcps: [] };
+  return { modes: [], lenses: [], skills: [], mcps: [], states: [] };
 }
 
 function safeNumber(value: unknown, fallback = 0): number {
@@ -30,7 +31,7 @@ export function normalizeCatalog(payload: any): CatalogSnapshot {
 
   for (const [group, items] of Object.entries(payload?.groups ?? {})) {
     if (!Array.isArray(items)) continue;
-    if (!['modes', 'lenses', 'skills', 'mcps'].includes(group)) continue;
+    if (!['modes', 'lenses', 'skills', 'mcps', 'states'].includes(group)) continue;
 
     const mapped = (items as any[])
       .map((x, i): Listing | null => {

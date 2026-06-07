@@ -11,5 +11,5 @@ export function isValidSlug(slug: string): boolean {
 }
 
 export function isValidType(type: string): type is ListingType {
-  return type === 'mode' || type === 'lens' || type === 'skill' || type === 'mcp';
+  return type === 'mode' || type === 'lens' || type === 'skill' || type === 'mcp' || type === 'state';
 }

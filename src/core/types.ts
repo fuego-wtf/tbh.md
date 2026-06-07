@@ -1,5 +1,5 @@
-export type ListingType = 'mode' | 'lens' | 'skill' | 'mcp';
-export type GroupName = 'modes' | 'lenses' | 'skills' | 'mcps';
+export type ListingType = 'mode' | 'lens' | 'skill' | 'mcp' | 'state';
+export type GroupName = 'modes' | 'lenses' | 'skills' | 'mcps' | 'states';
 
 export interface ListingAudit {
   name: string;

@@ -11,7 +11,7 @@ import StaggeredList from '../../components/StaggeredList';
 import FilterPills from '../../components/FilterPills';
 
 interface FindPageProps {
-  groups: Record<'modes' | 'lenses' | 'skills' | 'mcps', Listing[]>;
+  groups: Record<'modes' | 'lenses' | 'skills' | 'mcps' | 'states', Listing[]>;
   generatedAt: string | null;
   source: CatalogSource;
   navigate: (route: RouteState) => void;
