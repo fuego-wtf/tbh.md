@@ -1,6 +1,6 @@
 import type { ListingType } from './types';
 
-export const TYPE_ORDER: ListingType[] = ['mode', 'lens', 'skill', 'mcp'];
+export const TYPE_ORDER: ListingType[] = ['mode', 'lens', 'skill', 'mcp', 'state'];
 
 export function installCmd(owner: string, slug: string, version: string | null = null): string {
   const base = `bunx @tbh-md/cli install @${owner}/${slug}`;

@@ -20,6 +20,10 @@ const GROUP_TO_TYPE: Record<keyof CatalogSnapshot["groups"], ListingType> = {
   states: "state",
 };
 
+// Valid listing types, derived from the group map above so a poisoned shard
+// payload cannot inject an arbitrary `entity_type` into the install pipeline.
+const VALID_LISTING_TYPES = new Set<string>(Object.values(GROUP_TO_TYPE));
+
 function toNumber(input: unknown, fallback = 0): number {
   return typeof input === "number" && Number.isFinite(input) ? input : fallback;
 }
@@ -31,7 +35,10 @@ function normalizeGroup(group: keyof CatalogSnapshot["groups"], items: unknown[]
       const x = (item ?? {}) as Record<string, unknown>;
       const owner = String(x.owner ?? "community");
       const slug = String(x.slug ?? x.entity_id ?? `listing-${index}`);
-      const type = String(x.entity_type ?? fallbackType) as ListingType;
+      const rawType = String(x.entity_type ?? fallbackType);
+      const type: ListingType = VALID_LISTING_TYPES.has(rawType)
+        ? (rawType as ListingType)
+        : fallbackType;
       const versions =
         Array.isArray(x.versions) && x.versions.length > 0
           ? x.versions.map((v) => String(v))
