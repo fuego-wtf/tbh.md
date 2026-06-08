@@ -25,6 +25,47 @@ export interface Listing {
   artifactPath: string | null;
   installBehavior: string;
   url: string | null;
+  insights?: ListingInsights;
+  trust?: TrustProvenance;
+  experiences?: AgentExperience[];
+}
+
+// Honesty platform: every number is a receipt (value+denominator+n+source) or
+// status:'unavailable' (no number rendered). Populated by future packs; absent today.
+
+export interface Insight {
+  value: number | null;
+  denominator: number | null;
+  n: number;
+  computed_at: string | null;
+  confidence?: { ci_low: number; ci_high: number } | null;
+  source_event: string;
+  status: 'ok' | 'insufficient_n' | 'low_coverage' | 'stale' | 'unavailable';
+}
+
+export interface ListingInsights {
+  retention_7d?: Insight;
+  retention_30d?: Insight;
+  adoption?: Insight;
+  success_rate?: Insight;
+  version_coverage?: Insight;
+  freshness?: { days_since_publish?: number; days_since_last_run?: number };
+  popularity?: Insight;
+}
+
+export interface TrustProvenance {
+  tier: 'official' | 'verified' | 'community';
+  manifest_signed: boolean;
+  reputation?: Insight;
+}
+
+export interface AgentExperience {
+  listing_version_used: string;
+  manifest_sha_used: string;
+  way_of_work: string;
+  outcome_evidence?: string;
+  corroborations: number;
+  visible: boolean;
 }
 
 export interface CatalogSnapshot {
