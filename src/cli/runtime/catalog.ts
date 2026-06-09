@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -134,7 +135,7 @@ async function mergeShards(
 
   for (const shard of shards) {
     try {
-      const shardPayload = await loadShardPayload(catalogBasePath, shard.path);
+      const shardPayload = await loadShardPayload(catalogBasePath, shard);
       if (!shardPayload) continue;
 
       for (const group of ["modes", "lenses", "skills", "mcps", "states"] as const) {
@@ -157,14 +158,48 @@ async function mergeShards(
 
 /**
  * Load a single org shard index from local disk.
+ *
+ * Security: (1) path-containment — the resolved path must stay inside
+ * catalogBasePath to prevent directory traversal via poisoned shard pointers.
+ * (2) SHA-256 integrity — the raw bytes are hashed and compared to
+ * ShardPointer.sha256 before parsing; shards with a missing or mismatched
+ * digest are rejected with a clear console warning.
  */
 async function loadShardPayload(
   catalogBasePath: string,
-  relativePath: string,
+  shard: ShardPointer,
 ): Promise<CatalogPayload | null> {
-  const filePath = path.resolve(catalogBasePath, relativePath);
-  const raw = await readFile(filePath, "utf8");
-  return JSON.parse(raw) as CatalogPayload;
+  // (1) Path-containment check — reject any shard that escapes the catalog root.
+  const resolved = path.resolve(catalogBasePath, shard.path);
+  const containmentPrefix = catalogBasePath.endsWith(path.sep)
+    ? catalogBasePath
+    : catalogBasePath + path.sep;
+  if (resolved !== catalogBasePath && !resolved.startsWith(containmentPrefix)) {
+    console.warn(
+      `[catalog] Rejected shard "${shard.owner}": path "${shard.path}" escapes catalog root.`,
+    );
+    return null;
+  }
+
+  const rawBytes = await readFile(resolved);
+
+  // (2) SHA-256 integrity check — skip shard when digest is absent or mismatched.
+  if (!shard.sha256 || typeof shard.sha256 !== "string" || shard.sha256.trim() === "") {
+    console.warn(
+      `[catalog] Skipping shard "${shard.owner}": no sha256 digest provided.`,
+    );
+    return null;
+  }
+  const actualDigest = createHash("sha256").update(rawBytes).digest("hex");
+  if (actualDigest !== shard.sha256.trim().toLowerCase()) {
+    console.warn(
+      `[catalog] Rejected shard "${shard.owner}": SHA-256 mismatch ` +
+        `(expected ${shard.sha256}, got ${actualDigest}).`,
+    );
+    return null;
+  }
+
+  return JSON.parse(rawBytes.toString("utf8")) as CatalogPayload;
 }
 
 async function loadCatalogPayload(): Promise<CatalogPayload> {
