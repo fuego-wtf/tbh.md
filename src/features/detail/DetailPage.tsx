@@ -1,10 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { Listing, RouteState } from '../../core/types';
+import type { Insight, Listing, RouteState } from '../../core/types';
 import { installCmd, statusColor } from '../../core/view-utils';
 import Breadcrumb from '../../components/Breadcrumb';
 import InstallCTA from '../../components/InstallCTA';
 import CopyUrlButton from '../../components/CopyUrlButton';
 import EmptyState from '../../components/EmptyState';
+import { detectGraphynContext } from '../../core/graphyn-context';
+import {
+  fetchListingInsights,
+  type ListingInsightsResponse,
+} from '../../lib/listing-api';
 
 interface DetailPageProps {
   owner: string;
@@ -34,10 +39,44 @@ export default function DetailPage({
 
   const [selectedVersion, setSelectedVersion] = useState(listing?.version || '');
   const [artifact, setArtifact] = useState<string | null>(null);
+  const [insights, setInsights] = useState<ListingInsightsResponse['insights'] | null>(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
 
   useEffect(() => {
     setSelectedVersion(listing?.version || '');
   }, [listing?.id]);
+
+  // Honesty platform P5b: fetch org-scoped, suppression-first insights live.
+  // Org-scoped numbers require an authenticated Graphyn context — a public
+  // visitor (no token) gets no fetch and renders suppression-first, by design.
+  useEffect(() => {
+    let cancelled = false;
+    const slugForFetch = listing?.slug;
+    setInsights(null);
+
+    if (!slugForFetch) return;
+    const ctx = detectGraphynContext();
+    if (!ctx.idServiceUrl || !ctx.authToken) {
+      setInsightsLoading(false);
+      return;
+    }
+
+    setInsightsLoading(true);
+    fetchListingInsights(slugForFetch, ctx.authToken)
+      .then((res) => {
+        if (!cancelled) setInsights(res.insights ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setInsights(null);
+      })
+      .finally(() => {
+        if (!cancelled) setInsightsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [listing?.slug]);
 
   useEffect(() => {
     let cancelled = false;
@@ -246,6 +285,36 @@ export default function DetailPage({
             value={listing.firstSeen ? new Date(listing.firstSeen).toLocaleDateString() : '\u2014'}
           />
 
+          {/* Honesty-platform insights (P5b) \u2014 suppression-first: a rate renders
+              only at n>=20; smaller samples stay blank. Freshness is day-1 real. */}
+          <div
+            style={{
+              marginTop: 16,
+              paddingTop: 16,
+              borderTop: '1px solid var(--tb-bdr)',
+            }}
+          >
+            <div
+              style={{
+                fontSize: 11,
+                color: 'var(--tb-t3)',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                marginBottom: 10,
+              }}
+            >
+              Insights
+            </div>
+            <InsightRow label="Success rate" insight={insights?.success_rate} loading={insightsLoading} />
+            <InsightRow label="Adoption (30d)" insight={insights?.adoption} loading={insightsLoading} />
+            <InsightRow label="Retention 7d" insight={insights?.retention_7d} loading={insightsLoading} />
+            <InsightRow label="Retention 30d" insight={insights?.retention_30d} loading={insightsLoading} />
+            <FreshnessRow firstSeen={listing.firstSeen} />
+            <div style={{ fontSize: 10, color: 'var(--tb-t3)', marginTop: 8, lineHeight: 1.5 }}>
+              Real product signals, org-scoped. A rate appears only at n&ge;20.
+            </div>
+          </div>
+
           {listing.audits?.length > 0 && (
             <div
               style={{
@@ -344,6 +413,103 @@ function Stat({
       >
         {value}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Suppression-first insight row. A number is rendered ONLY when the insight is
+ * `status: 'ok'` with a real value; every other state (insufficient_n, stale,
+ * unavailable, not-fetched, loading) renders an em-dash and a muted reason —
+ * never a fabricated zero. This is the honesty contract made visible.
+ */
+function InsightRow({
+  label,
+  insight,
+  loading,
+}: {
+  label: string;
+  insight?: Insight;
+  loading: boolean;
+}) {
+  const isOk =
+    insight?.status === 'ok' &&
+    insight.value !== null &&
+    insight.value !== undefined;
+
+  let display: string;
+  let detail: string | null = null;
+  if (loading && !insight) {
+    display = '…';
+  } else if (isOk) {
+    display = `${Math.round((insight!.value as number) * 100)}%`;
+    detail = `n=${insight!.n}`;
+  } else {
+    display = '—';
+    detail =
+      insight?.status === 'insufficient_n'
+        ? `n=${insight.n} (<20)`
+        : 'no signal yet';
+  }
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'baseline',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+      }}
+    >
+      <span style={{ fontSize: 13, color: 'var(--tb-t2)' }}>{label}</span>
+      <span style={{ display: 'inline-flex', alignItems: 'baseline', gap: 6 }}>
+        <span
+          style={{
+            fontSize: 14,
+            color: isOk ? 'var(--tb-t1)' : 'var(--tb-t3)',
+            fontFamily: 'JetBrains Mono, monospace',
+          }}
+        >
+          {display}
+        </span>
+        {detail && <span style={{ fontSize: 10, color: 'var(--tb-t3)' }}>{detail}</span>}
+      </span>
+    </div>
+  );
+}
+
+/**
+ * Freshness is computable day-1 from the publish date — a real number that needs
+ * no suppression floor. Days since the listing was first seen.
+ */
+function FreshnessRow({ firstSeen }: { firstSeen: string | null }) {
+  let display = '—';
+  if (firstSeen) {
+    const days = Math.max(
+      0,
+      Math.floor((Date.now() - new Date(firstSeen).getTime()) / 86400000),
+    );
+    display = days === 0 ? 'today' : `${days}d ago`;
+  }
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'baseline',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+      }}
+    >
+      <span style={{ fontSize: 13, color: 'var(--tb-t2)' }}>Freshness</span>
+      <span
+        style={{
+          fontSize: 14,
+          color: 'var(--tb-t1)',
+          fontFamily: 'JetBrains Mono, monospace',
+        }}
+      >
+        {display}
+      </span>
     </div>
   );
 }

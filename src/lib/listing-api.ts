@@ -1,4 +1,4 @@
-import type { Listing } from '../core/types';
+import type { Insight, Listing } from '../core/types';
 import { detectGraphynContext } from '../core/graphyn-context';
 
 /* ------------------------------------------------------------------ */
@@ -122,4 +122,39 @@ export async function deleteListing(
     method: 'DELETE',
     authToken,
   });
+}
+
+/* ------------------------------------------------------------------ */
+/*  Honesty platform — product-signal insights (P4 → P5b consumer)    */
+/* ------------------------------------------------------------------ */
+
+/** Response shape of the id service `GET /signals/insights/:listing_slug`. */
+export interface ListingInsightsResponse {
+  listing_slug: string;
+  insights: {
+    success_rate?: Insight;
+    adoption?: Insight;
+    retention_7d?: Insight;
+    retention_30d?: Insight;
+  };
+}
+
+/**
+ * Fetch org-scoped, suppression-first product-signal insights for a listing.
+ *
+ * The id endpoint is `requireAuth` + org-scoped, so this only resolves inside an
+ * authenticated Graphyn context (Desktop host bridge or a signed-in tbh.md
+ * session). In a plain public browser there is no token — `request()` throws,
+ * and the caller renders suppression-first (no number). That is the honest,
+ * privacy-correct default: org-scoped numbers are never shown to an anonymous
+ * visitor, and nothing is ever merged into the public (cached) catalog payload.
+ */
+export async function fetchListingInsights(
+  slug: string,
+  authToken?: string,
+): Promise<ListingInsightsResponse> {
+  return request<ListingInsightsResponse>(
+    `/signals/insights/${encodeURIComponent(slug)}`,
+    { method: 'GET', authToken },
+  );
 }
