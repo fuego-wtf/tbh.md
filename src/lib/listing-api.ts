@@ -1,4 +1,4 @@
-import type { Insight, Listing } from '../core/types';
+import type { AgentExperience, Insight, Listing } from '../core/types';
 import { detectGraphynContext } from '../core/graphyn-context';
 
 /* ------------------------------------------------------------------ */
@@ -157,4 +157,38 @@ export async function fetchListingInsights(
     `/signals/insights/${encodeURIComponent(slug)}`,
     { method: 'GET', authToken },
   );
+}
+
+/** Resolve an API base without requiring auth; null when none is configured. */
+function getPublicBaseUrl(): string | null {
+  const ctx = detectGraphynContext();
+  if (ctx.idServiceUrl) return ctx.idServiceUrl;
+  const envUrl =
+    typeof import.meta !== 'undefined'
+      ? (import.meta as { env?: Record<string, string | undefined> }).env?.VITE_LISTING_API_URL
+      : undefined;
+  return envUrl ?? null;
+}
+
+/**
+ * Fetch the PUBLIC visible (approved + corroborated) Agent Experiences for a
+ * listing. Unauthenticated — published experiences are public, redacted content
+ * only. Best-effort: resolves to [] when no base URL is configured or the
+ * request fails, so the caller renders the honest empty state.
+ */
+export async function fetchVisibleExperiences(slug: string): Promise<AgentExperience[]> {
+  const base = getPublicBaseUrl();
+  if (!base) return [];
+  try {
+    const res = await fetch(`${base}/experiences/${encodeURIComponent(slug)}`, {
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    const data = (await res.json().catch(() => null)) as
+      | { experiences?: AgentExperience[] }
+      | null;
+    return Array.isArray(data?.experiences) ? data!.experiences : [];
+  } catch {
+    return [];
+  }
 }

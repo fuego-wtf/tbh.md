@@ -8,6 +8,7 @@ import EmptyState from '../../components/EmptyState';
 import { detectGraphynContext } from '../../core/graphyn-context';
 import {
   fetchListingInsights,
+  fetchVisibleExperiences,
   type ListingInsightsResponse,
 } from '../../lib/listing-api';
 
@@ -41,6 +42,7 @@ export default function DetailPage({
   const [artifact, setArtifact] = useState<string | null>(null);
   const [insights, setInsights] = useState<ListingInsightsResponse['insights'] | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
+  const [liveExperiences, setLiveExperiences] = useState<AgentExperience[] | null>(null);
 
   useEffect(() => {
     setSelectedVersion(listing?.version || '');
@@ -71,6 +73,28 @@ export default function DetailPage({
       })
       .finally(() => {
         if (!cancelled) setInsightsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [listing?.slug]);
+
+  // Honesty P6: fetch the public visible experiences live from the id endpoint
+  // (the real source). Best-effort — empty/failed falls back to the catalog
+  // payload's experiences below.
+  useEffect(() => {
+    let cancelled = false;
+    const slugForFetch = listing?.slug;
+    setLiveExperiences(null);
+    if (!slugForFetch) return;
+
+    fetchVisibleExperiences(slugForFetch)
+      .then((rows) => {
+        if (!cancelled) setLiveExperiences(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setLiveExperiences(null);
       });
 
     return () => {
@@ -263,7 +287,13 @@ export default function DetailPage({
           {/* Agent Experiences (honesty P6 surface) — suppression-first: a way of
               work shows only when it is visible AND corroborated by >=50 agents.
               Reuses the existing card vocabulary; empty until real data lands. */}
-          <ExperiencesSection experiences={listing.experiences} />
+          <ExperiencesSection
+            experiences={
+              liveExperiences && liveExperiences.length > 0
+                ? liveExperiences
+                : listing.experiences
+            }
+          />
         </section>
 
         <aside
