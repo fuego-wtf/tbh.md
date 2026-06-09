@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { Insight, Listing, RouteState } from '../../core/types';
+import type { AgentExperience, Insight, Listing, RouteState } from '../../core/types';
 import { installCmd, statusColor } from '../../core/view-utils';
 import Breadcrumb from '../../components/Breadcrumb';
 import InstallCTA from '../../components/InstallCTA';
@@ -259,6 +259,11 @@ export default function DetailPage({
               )}
             </div>
           </article>
+
+          {/* Agent Experiences (honesty P6 surface) — suppression-first: a way of
+              work shows only when it is visible AND corroborated by >=50 agents.
+              Reuses the existing card vocabulary; empty until real data lands. */}
+          <ExperiencesSection experiences={listing.experiences} />
         </section>
 
         <aside
@@ -314,6 +319,52 @@ export default function DetailPage({
               Real product signals, org-scoped. A rate appears only at n&ge;20.
             </div>
           </div>
+
+          {listing.trust && (
+            <div
+              style={{
+                marginTop: 16,
+                paddingTop: 16,
+                borderTop: '1px solid var(--tb-bdr)',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 11,
+                  color: 'var(--tb-t3)',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  marginBottom: 10,
+                }}
+              >
+                Trust
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  justifyContent: 'space-between',
+                  marginBottom: 8,
+                }}
+              >
+                <span style={{ fontSize: 13, color: 'var(--tb-t2)' }}>Publisher</span>
+                <TrustChip label={listing.trust.tier} ok={listing.trust.tier !== 'community'} />
+              </div>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'baseline',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <span style={{ fontSize: 13, color: 'var(--tb-t2)' }}>Manifest</span>
+                <TrustChip
+                  label={listing.trust.manifest_signed ? 'signed' : 'unsigned'}
+                  ok={listing.trust.manifest_signed}
+                />
+              </div>
+            </div>
+          )}
 
           {listing.audits?.length > 0 && (
             <div
@@ -511,5 +562,120 @@ function FreshnessRow({ firstSeen }: { firstSeen: string | null }) {
         {display}
       </span>
     </div>
+  );
+}
+
+/** An experience is published only once corroborated by this many agents. */
+const CORROBORATION_FLOOR = 50;
+
+/**
+ * Agent Experiences — suppression-first social proof. A way of work is rendered
+ * ONLY when the backend marked it visible AND it cleared the corroboration
+ * floor; otherwise an honest empty state, never a fabricated tip.
+ */
+function ExperiencesSection({ experiences }: { experiences?: AgentExperience[] }) {
+  const visible = (experiences ?? []).filter(
+    (e) => e.visible && e.corroborations >= CORROBORATION_FLOOR,
+  );
+
+  return (
+    <div style={{ marginTop: 20 }}>
+      <div
+        style={{
+          fontSize: 11,
+          color: 'var(--tb-t3)',
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+          marginBottom: 10,
+        }}
+      >
+        Agent Experiences{visible.length > 0 ? ` (${visible.length})` : ''}
+      </div>
+      {visible.length === 0 ? (
+        <div
+          style={{
+            border: '1px dashed var(--tb-bdr)',
+            borderRadius: 8,
+            padding: 16,
+            textAlign: 'center',
+            fontSize: 12,
+            color: 'var(--tb-t3)',
+            lineHeight: 1.6,
+          }}
+        >
+          No experiences yet. A way of work appears here once{' '}
+          {CORROBORATION_FLOOR}+ agents corroborate it — never on the strength of
+          one voice.
+        </div>
+      ) : (
+        visible.map((exp, i) => <ExperienceCard key={i} exp={exp} />)
+      )}
+    </div>
+  );
+}
+
+function ExperienceCard({ exp }: { exp: AgentExperience }) {
+  return (
+    <article
+      style={{
+        border: '1px solid var(--tb-bdr)',
+        borderRadius: 8,
+        background: 'var(--tb-surface)',
+        padding: 12,
+        marginBottom: 10,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
+          flexWrap: 'wrap',
+          fontSize: 11,
+          color: 'var(--tb-t3)',
+          fontFamily: 'JetBrains Mono, monospace',
+          marginBottom: 6,
+        }}
+      >
+        <span
+          style={{
+            color: 'var(--tb-ok)',
+            border: '1px solid rgba(40,200,64,.3)',
+            borderRadius: 3,
+            padding: '1px 6px',
+          }}
+        >
+          {exp.corroborations} corroborated
+        </span>
+        <span>v{exp.listing_version_used}</span>
+        {exp.manifest_sha_used && <span>manifest {exp.manifest_sha_used.slice(0, 8)}</span>}
+      </div>
+      <div style={{ fontSize: 13, color: 'var(--tb-t1)', lineHeight: 1.6 }}>
+        {exp.way_of_work}
+      </div>
+      {exp.outcome_evidence && (
+        <div style={{ fontSize: 12, color: 'var(--tb-t2)', marginTop: 6 }}>
+          {exp.outcome_evidence}
+        </div>
+      )}
+    </article>
+  );
+}
+
+/** Small trust/provenance chip — green when the signal is positive. */
+function TrustChip({ label, ok }: { label: string; ok: boolean }) {
+  return (
+    <span
+      style={{
+        fontSize: 10,
+        border: `1px solid ${ok ? 'rgba(40,200,64,.3)' : 'var(--tb-bdr)'}`,
+        borderRadius: 3,
+        padding: '1px 6px',
+        color: ok ? 'var(--tb-ok)' : 'var(--tb-t3)',
+        fontFamily: 'JetBrains Mono, monospace',
+      }}
+    >
+      {label}
+    </span>
   );
 }

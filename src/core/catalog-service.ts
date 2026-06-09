@@ -66,6 +66,11 @@ export function normalizeCatalog(payload: any): CatalogSnapshot {
           artifactPath: x.artifact_path ? String(x.artifact_path) : null,
           installBehavior: String(x.install_behavior ?? 'normal'),
           url: x.url ? String(x.url) : null,
+          // Honesty surfaces: experiences + trust are PUBLIC (post-redaction,
+          // post-approval), so they ride the catalog payload. Org-scoped
+          // insights deliberately do NOT — they stay a live authenticated fetch.
+          experiences: Array.isArray(x.experiences) ? x.experiences : undefined,
+          trust: x.trust ?? undefined,
         };
       })
       .filter((x): x is Listing => x !== null);
