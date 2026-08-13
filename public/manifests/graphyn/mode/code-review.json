@@ -1,7 +1,0 @@
-{
-  "$schema": "https://tbh.md/schemas/manifest-v1.json",
-  "artifactPath": "public/artifacts/graphyn/mode/code-review/MODE.md",
-  "sha256": "36118e2bb83c8eefb5d37ff3c29ac68489d1a38bc9f373cf7298cf762741e643",
-  "version": "1.1.0",
-  "listingId": "lst_mode_code_review"
-}
